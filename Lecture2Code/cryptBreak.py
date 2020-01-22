@@ -4,11 +4,31 @@ Name: Sneha Mahapatra
 ECN Login: mahapat0
 Due Date: 01/23/20
 '''
-
+import os.path
+from cryptBreak import *
 from BitVector import *
 PassPhrase = "Hopes and dreams of a million years"
 BLOCKSIZE = 16
 numbytes = BLOCKSIZE//8
+
+if __name__ == '__main__':
+    bruteForce()
+
+def bruteForce():
+    allPValues = tuple(range(0, 2 ** 16))
+    for key in allPValues:
+        plain = cryptBreak('encrypted.txt', key)
+        if "Mark Twain" in plain:
+            print("Encryption Broken!")
+            print("Key: ",key)
+            print("Message: ",plain)
+            if os.path.isfile('decrypted.txt'):
+                FILEOUT = open('decrypted.txt', 'w')  # (d)
+                FILEOUT.write(plain)  # (e)
+                FILEOUT.close()
+            else:
+                print("File decrypted.txt does not exist")
+            break
 
 def cryptBreak(ciphertextFile, key):
     FILEIN = open(ciphertextFile)  # (J)
