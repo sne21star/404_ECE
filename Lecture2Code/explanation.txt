@@ -1,0 +1,1 @@
+For HW1 we have created a program that uses brute force attack to find the right key. The Brute Force attack will check through 2^16 key spaces. We checked through range(0,2^16) and then changed to a bit vector, used the decryption method given in DecryptForFun.py and checked whether the string "Mark Twain" appeared in the file. 

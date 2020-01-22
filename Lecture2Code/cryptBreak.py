@@ -1,3 +1,10 @@
+'''
+Homework Number:   1
+Name: Sneha Mahapatra
+ECN Login: mahapat0
+Due Date: 01/23/20
+'''
+
 from BitVector import *
 PassPhrase = "Hopes and dreams of a million years"
 BLOCKSIZE = 16

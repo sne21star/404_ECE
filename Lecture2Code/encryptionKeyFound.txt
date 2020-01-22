@@ -1,0 +1,3 @@
+Encryption Broken!
+Key:  25202
+Message:  It is my belief that nearly any invented quotation, played with confidence, stands a good chance to deceive.
