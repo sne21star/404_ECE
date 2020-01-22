@@ -3,7 +3,7 @@ PassPhrase = "Hopes and dreams of a million years"
 BLOCKSIZE = 16
 numbytes = BLOCKSIZE//8
 
-def cryptBreak(key, ciphertextFile):
+def cryptBreak(ciphertextFile, key):
     FILEIN = open(ciphertextFile)  # (J)
     encrypted_bv = BitVector(hexstring=FILEIN.read())
     bv_iv = BitVector(bitlist=[0] * BLOCKSIZE)  # (F)
