@@ -30,24 +30,15 @@ def generate_round_keys(encryption_key):
         round_keys.append(round_key)
     return round_keys
 
-def get_encryption_key():
-    key = ""
-    while True:
-        if sys.version_info[0] == 3:
-            key = input("\nEnter a string of 8 characters for the key: ")
-        else:
-            key = raw_input("\nEnter a string of 8 characters for the key: ")
-        if len(key) != 8:
-            print("\nKey generation needs 8 characters exactly.  Try again.\n")
-            continue
-        else:
-            break
+def get_encryption_key(key):
     key = BitVector(textstring = key)
     key = key.permute(key_permutation_1)
     return key
 
+'''
 encryption_key = get_encryption_key()
 round_keys = generate_round_keys(encryption_key)
-print("\nHere are the 16 round keys:\n")
+print("Here are the 16 round keys:")
 for round_key in round_keys:
     print(round_key)
+'''

@@ -79,7 +79,7 @@ def substitute( expanded_half_block ):
         column = int(segments[sindex][1:-1])
         output[sindex*4:sindex*4+4] = BitVector(intVal = s_boxes[sindex][row][column], size = 4)
     return output        
-
+'''
 # For the purpose of this illustration, let's just make up the right-half of a 
 # 64-bit DES bit block:
 right_half_32bits = BitVector( intVal = 800000700, size = 32 )
@@ -87,9 +87,10 @@ right_half_32bits = BitVector( intVal = 800000700, size = 32 )
 # Now we need to expand the 32-bit block into 48 bits:
 right_half_with_expansion_permutation = right_half_32bits.permute( expansion_permutation ) 
 
-print "expanded right_half_32bits: ", right_half_with_expansion_permutation
+print("expanded right_half_32bits: " + str(right_half_with_expansion_permutation))
 
 # The following statement takes the 48 bits back down to 32 bits after carrying
 # out S-box based substitutions:
 output = substitute(right_half_with_expansion_permutation)
-print output
+print(output)
+'''

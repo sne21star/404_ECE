@@ -1,50 +1,109 @@
+"""
+Homework Number: 2
+Name: Sneha Mahapatra
+ECN Login: mahapat0
+Due Date: 01/30/2020
+"""
 #!/usr/bin/env python
-
+#!/usr/bin/env python -W ignore::DeprecationWarning
 ### hw2_starter.py
-
+import codecs
 import sys
 import BitVector
-
+#from get_encryption_key import *
+from generate_round_keys import *
+from illustrate_des_substitution import *
 
 expansion_permutation = [31, 0, 1, 2, 3, 4, 3, 4, 5, 6, 7, 8, 7, 8, 9, 10, 11, 12, 11, 12, 13, 14, 15, 16, 15, 16, 17, 18, 19, 20, 19, 20, 21, 22, 23, 24, 23, 24, 25, 26, 27, 28, 27, 28, 29, 30, 31, 0]
-
-
+p_box_permutation = [15,6,19,20,28,11,27,16,0,14,22,25,4,17,30,9,1,7,23,13,31,26,2,8,18,12,29,5,21,10,3,24]
+SIZE = 64
 def encrypt():
-    key = get_encryption_key()
-    round_key = extract_round_key( key )
-    bv = BitVector( 'filename.txt' )
+    FILEREAD = open(sys.argv[4], 'r')
+    key = FILEREAD.read()
+    FILEREAD.close()
+    keyBit = get_encryption_key(key)
+    round_key = generate_round_keys(keyBit)
+    bv = BitVector(filename = sys.argv[3])
+    text_file = open(sys.argv[5], "w")
     while (bv.more_to_read):
-        bitvec = bv.read_bits_from_file( 64 )
-        if bitvec.getsize() > 0:
+        bitvec = bv.read_bits_from_file(SIZE)
+        if (len(str(bitvec)) % SIZE != 0):
+            bitVecS = str(bitvec)
+            bitVecS = bitVecS.ljust(SIZE, '0')
+            bitvec = BitVector(bitstring=bitVecS)
+        if(len(str(bitvec)) > 0):
             [LE, RE] = bitvec.divide_into_two()
-            newRE = RE.permute( expansion_permutation )
-            out_xor = newRE.bv_xor( round_key )
+            temp = RE
+            for keyR in round_key:
+                newRE = RE.permute(expansion_permutation)
+                out_xor = newRE ^ keyR
+                output = substitute(out_xor)
+                round_i = output.permute(p_box_permutation)
+                LE = LE ^ round_i
+                RE = LE
+                LE = temp
+        print(LE)
+        print(RE)
+        bitX = LE + RE
+        myhexstring = bitX.get_bitvector_in_hex()
+        text_file.write(myhexstring)
+    text_file.close()
+    pass
 
-            '''
-            now comes the hard part --- the substition boxes
+def decrypt():
+    FILEREAD = open(sys.argv[4], 'r')
+    key = FILEREAD.read()
+    FILEREAD.close()
+    keyBit = get_encryption_key(key)
+    round_key = generate_round_keys(keyBit)
+    round_key = round_key[::-1]
+    FILEHEX = open(sys.argv[3], 'r')
+    hexString = FILEHEX.read()
+    bv = BitVector(hexstring=hexString)
+    bvList= list(bv)
+    FILEHEX.close()
 
-            Let's say after the substitution boxes and another
-            permutation (P in Section 3.3.4), the output for RE is
-            RE_modified.
+    text_file = open(sys.argv[5], "w")
 
-            When you join the two halves of the bit string
-            again, the rule to follow (from Fig. 4 in page 21) is
-            either
+    secOfBits = bv.length()/SIZE
+    index = 0
+    index1 = 0
+    totalList = []
+    while (index < secOfBits):
+        bitvec = BitVector(bitlist = bvList[index1:index1+SIZE])
+        print(bitvec.length())
+        [LE, RE] = bitvec.divide_into_two()
+        temp = RE
+        print(LE)
+        print(RE)
+        for keyR in round_key:
+            newRE = RE.permute(expansion_permutation)
+            out_xor = newRE ^ keyR
+            output = substitute(out_xor)
+            round_i = output.permute(p_box_permutation)
+            LE = round_i ^ LE
+            RE = LE
+            LE = temp
+        bitX = LE + RE
+        totalList.append(list(bitX))
+        index+=1
+        index1 += 64
+    totalList = totalList[0]
+    bitList = BitVector(bitlist=totalList)
+    text_file.write(bitList.get_text_from_bitvector())
+    text_file.close()
+    pass
 
-            final_string = RE followed by (RE_modified xored with LE)
+def main():
+    charX = sys.argv[2]
+    if(charX == '-e'):
+        encrypt()
+    elif(charX == '-d'):
+        decrypt()
+    else:
+        print("Either -e or -d")
+    pass
 
-            or
-
-            final_string = LE followed by (LE_modified xored with RE)
-
-            depending upon whether you prefer to do the substitutions
-            in the right half (as shown in Fig. 4) or in the left
-            half.
-
-            The important thing to note is that the swap between the
-            two halves shown in Fig. 4 is essential to the working
-            of the algorithm even in a single-round implementation
-            of the cipher, especially if you want to use the same
-            algorithm for both encryption and decryption (see Fig.
-            3 page 15). The two rules shown above include this swap.
-            '''
+if __name__ == "__main__":
+    main()
+#Convert Image to Bit vector and get rid of first three lines
