@@ -90,7 +90,6 @@ def decrypt():
             RE = LE
             LE = temp
         bitX = RE + LE
-        '''
         if(secOfBits - index == 1):
             strX =bitX.get_text_from_bitvector()
             strC = list(strX)
@@ -99,8 +98,7 @@ def decrypt():
                     text_file.write(k)
             print(strX)
         else:
-        '''
-        text_file.write(bitX.get_text_from_bitvector())
+            text_file.write(bitX.get_text_from_bitvector())
         index += 1
         index1 += 64
     text_file.close()
