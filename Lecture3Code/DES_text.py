@@ -31,7 +31,7 @@ def encrypt():
         bitvec = bv.read_bits_from_file(SIZE)
         if (len(str(bitvec)) % SIZE != 0):
             x = bitvec.length() % SIZE
-            bitvec.pad_from_right(SIZE-x)
+            bitvec.pad_from_left(SIZE-x)
         if (len(str(bitvec)) > 0):
             [LE, RE] = bitvec.divide_into_two()
             for keyR in round_key:
@@ -84,14 +84,7 @@ def decrypt():
             RE = LE
             LE = temp
         bitX = RE + LE
-        if(secOfBits - index == 1):
-            strX =bitX.get_text_from_bitvector()
-            strC = list(strX)
-            for k in strC:
-                if(k.isprintable()):
-                    text_file.write(k)
-        else:
-            text_file.write(bitX.get_text_from_bitvector())
+        text_file.write(bitX.get_text_from_bitvector())
         index += 1
         index1 += SIZE
     text_file.close()
