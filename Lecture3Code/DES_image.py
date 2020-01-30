@@ -23,21 +23,21 @@ p_box_permutation = [15,6,19,20,28,11,27,16,0,14,22,25,4,17,30,9,1,7,23,13,31,26
 SIZE = 64
 def encrypt():
 
-    FILEREAD = open(sys.argv[3], 'r')
+    FILEREAD = open(sys.argv[2], 'r')
     key = FILEREAD.read()
     FILEREAD.close()
 
-    image = open(sys.argv[2], 'rb')
+    image = open(sys.argv[1], 'rb')
     imageno = image.readline()
     height_width = image.readline()
     max_pixVal = image.readline()
-    bv = BitVector(filename=sys.argv[2])
+    bv = BitVector(filename=sys.argv[1])
     image.close()
 
     keyBit = get_encryption_key(key)
     round_key = generate_round_keys(keyBit)
 
-    text_file = open(sys.argv[4], "wb")
+    text_file = open(sys.argv[3], "wb")
     text_file.write(imageno)
     text_file.write(height_width)
     text_file.write(max_pixVal)

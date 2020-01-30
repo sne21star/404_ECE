@@ -20,18 +20,19 @@ p_box_permutation = [15, 6, 19, 20, 28, 11, 27, 16, 0, 14, 22, 25, 4, 17, 30, 9,
 SIZE = 64
 
 def encrypt():
-    FILEREAD = open(sys.argv[4], 'r')
+    FILEREAD = open(sys.argv[3], 'r')
     key = FILEREAD.read()
     FILEREAD.close()
     keyBit = get_encryption_key(key)
     round_key = generate_round_keys(keyBit)
-    bv = BitVector(filename=sys.argv[3])
-    text_file = open(sys.argv[5], "w")
+    bv = BitVector(filename=sys.argv[2])
+    text_file = open(sys.argv[4], "w")
     while (bv.more_to_read):
         bitvec = bv.read_bits_from_file(SIZE)
         if (len(str(bitvec)) % SIZE != 0):
             x = bitvec.length() % SIZE
-            bitvec.pad_from_left(SIZE-x)
+            bitvec.pad_from_left(SIZE-
+                                 x)
         if (len(str(bitvec)) > 0):
             [LE, RE] = bitvec.divide_into_two()
             for keyR in round_key:
@@ -51,21 +52,21 @@ def encrypt():
 
 
 def decrypt():
-    FILEREAD = open(sys.argv[4], 'r')
+    FILEREAD = open(sys.argv[3], 'r')
     key = FILEREAD.read()
     FILEREAD.close()
     keyBit = get_encryption_key(key)
     round_key = generate_round_keys(keyBit)
     round_key = round_key[::-1]
 
-    FILEHEX = open(sys.argv[3], 'r')
+    FILEHEX = open(sys.argv[2], 'r')
     hexString = FILEHEX.read()
     bv = BitVector(hexstring=hexString)
 
     bvList = list(bv)
     FILEHEX.close()
 
-    text_file = open(sys.argv[5], "w")
+    text_file = open(sys.argv[4], "w")
 
     secOfBits = bv.length() / SIZE
     index = 0
@@ -91,7 +92,8 @@ def decrypt():
     pass
 
 def main():
-    charX = sys.argv[2]
+    charX = sys.argv[1]
+    print(charX)
     if (charX == '-e'):
         encrypt()
     elif (charX == '-d'):
