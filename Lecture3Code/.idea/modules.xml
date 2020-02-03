@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/../../EPCS412/CNN_ASL/.idea/CNN_ASL.iml" filepath="$PROJECT_DIR$/../../EPCS412/CNN_ASL/.idea/CNN_ASL.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/Lecture3Code.iml" filepath="$PROJECT_DIR$/.idea/Lecture3Code.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../Lecture4Code/.idea/Lecture4Code.iml" filepath="$PROJECT_DIR$/../Lecture4Code/.idea/Lecture4Code.iml" />
     </modules>
   </component>
 </project>
