@@ -4,7 +4,6 @@ Name: Sneha Mahapatra
 ECN Login: mahapat0
 Due Date: 02/03/2020
 '''
-from sympy import *
 # Constants
 prime50 = dict({2: 1, 3: 1, 5: 1, 7: 1, 11: 1, 13: 1, 17: 1, 19: 1, 23: 1, 29: 1, 31: 1, 37: 1, 41: 1, 43: 1, 47: 1})
 
@@ -38,9 +37,9 @@ def main():
 	isField = isfield(num)
 
 	if isField:
-		print("Z_" + str(num) + " is a Field")
+		print("field")
 	else:
-		print("Z_" + str(num) + " is a Commutative Ring only")
+		print("ring")
 
 if __name__ == "__main__":
 	main()
