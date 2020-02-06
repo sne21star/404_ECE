@@ -23,6 +23,8 @@ def isprime(given_num):
 		return True
 	elif given_num % 2 == 0:
 		return False
+	elif given_num == 5:
+		return True
 	elif given_num % 5 == 0:
 		return False
 	isPrime = (2 ^ (given_num-1)) % given_num
