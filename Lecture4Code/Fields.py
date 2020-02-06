@@ -18,7 +18,19 @@ def getinput():
 
 #Used fermat little primality, a probability test to check whether or not it is prime
 def isPrime(given_num):
-	return isprime(given_num)
+	isprimeX = True
+	if(given_num < 2):
+		return False
+	elif(given_num == 2):
+		return True
+	elif(given_num % 2 == 0):
+		return False
+	else:
+		for factor in range(2, given_num):
+			if(given_num % factor) == 0:
+				isprimeX = False
+				break
+	return isprimeX
 
 def isfield(num):
 	return isPrime(num)
@@ -26,13 +38,16 @@ def isfield(num):
 def main():
 	given_num = getinput()
 	isField = isfield(given_num)
-	for i in range(0, 100):
+	for i in range(0, 1000):
 		isField = isfield(i)
+		'''
 		print(i)
 		if isField:
 			print("field")
 		else:
 			print("ring")
+		'''
+		print(isprime(i)==isField)
 
 if __name__ == "__main__":
 	main()
