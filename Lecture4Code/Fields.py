@@ -4,7 +4,6 @@ Name: Sneha Mahapatra
 ECN Login: mahapat0
 Due Date: 02/05/2020
 '''
-from sympy import *
 def getinput():
 	gotNumber = False
 	while not gotNumber:
@@ -38,16 +37,9 @@ def isfield(num):
 def main():
 	given_num = getinput()
 	isField = isfield(given_num)
-	for i in range(0, 1000):
-		isField = isfield(i)
-		'''
-		print(i)
-		if isField:
-			print("field")
-		else:
-			print("ring")
-		'''
-		print(isprime(i)==isField)
-
+	if isField:
+		print("field")
+	else:
+		print("ring")
 if __name__ == "__main__":
 	main()
