@@ -21,9 +21,9 @@ def isprime(given_num):
 		return False
 	elif given_num == 2:
 		return True
-	elif given_num%2 == 0:
+	elif given_num % 2 == 0:
 		return False
-	isPrime = (2 ** given_num-1) % given_num == 1
+	isPrime = (2 ^ given_num-1) % given_num
 	return isPrime
 
 def isfield(num):
