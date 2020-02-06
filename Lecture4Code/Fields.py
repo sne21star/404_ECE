@@ -15,7 +15,6 @@ def getinput():
 			gotNumber = True
 	return int(given_num)
 
-#Used fermat little primality, a probability test to check whether or not it is prime
 def isPrime(given_num):
 	isprimeX = True
 	if(given_num < 2):
