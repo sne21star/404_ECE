@@ -24,6 +24,7 @@ def main():
     key = key.strip()
     key += '0' * (keysize//8 - len(key)) if len(key) < keysize//8 else key[:keysize//8]
     key_bv = BitVector( textstring = key )
+    key_words = gen_key_schedule_256(key_bv)
 
     key_schedule = []
     print("\nEach 32-bit word of the key schedule is shown as a sequence of 4 one-byte integers:")
@@ -55,42 +56,6 @@ def gee(keyword, round_constant, byte_sub_table):
     newword[:8] ^= round_constant
     round_constant = round_constant.gf_multiply_modular(BitVector(intVal = 0x02), AES_modulus, 8)
     return newword, round_constant
-
-def gen_key_schedule_128(key_bv):
-    byte_sub_table = gen_subbytes_table()
-    #  We need 44 keywords in the key schedule for 128 bit AES.  Each keyword is 32-bits
-    #  wide. The 128-bit AES uses the first four keywords to xor the input block with.
-    #  Subsequently, each of the 10 rounds uses 4 keywords from the key schedule. We will
-    #  store all 44 keywords in the following list:
-    key_words = [None for i in range(44)]
-    round_constant = BitVector(intVal = 0x01, size=8)
-    for i in range(4):
-        key_words[i] = key_bv[i*32 : i*32 + 32]
-    for i in range(4,44):
-        if i%4 == 0:
-            kwd, round_constant = gee(key_words[i-1], round_constant, byte_sub_table)
-            key_words[i] = key_words[i-4] ^ kwd
-        else:
-            key_words[i] = key_words[i-4] ^ key_words[i-1]
-    return key_words
-
-def gen_key_schedule_192(key_bv):
-    byte_sub_table = gen_subbytes_table()
-    #  We need 52 keywords (each keyword consists of 32 bits) in the key schedule for
-    #  192 bit AES.  The 192-bit AES uses the first four keywords to xor the input
-    #  block with.  Subsequently, each of the 12 rounds uses 4 keywords from the key
-    #  schedule. We will store all 52 keywords in the following list:
-    key_words = [None for i in range(52)]
-    round_constant = BitVector(intVal = 0x01, size=8)
-    for i in range(6):
-        key_words[i] = key_bv[i*32 : i*32 + 32]
-    for i in range(6,52):
-        if i%6 == 0:
-            kwd, round_constant = gee(key_words[i-1], round_constant, byte_sub_table)
-            key_words[i] = key_words[i-6] ^ kwd
-        else:
-            key_words[i] = key_words[i-6] ^ key_words[i-1]
-    return key_words
 
 def gen_key_schedule_256(key_bv):
     byte_sub_table = gen_subbytes_table()
@@ -129,22 +94,5 @@ def gen_subbytes_table():
         a ^= (a1 >> 4) ^ (a2 >> 5) ^ (a3 >> 6) ^ (a4 >> 7) ^ c
         subBytesTable.append(int(a))
     return subBytesTable
-
-def get_key_from_user():
-    key = keysize = None
-    if sys.version_info[0] == 3:
-        keysize = int(input("\nAES Key size:  "))
-        assert any(x == keysize for x in [128,192,256]), \
-                                    "keysize is wrong (must be one of 128, 192, or 256) --- aborting"
-        key = input("\nEnter key (any number of chars):  ")
-    else:
-        keysize = int(input("\nAES Key size:  "))
-        assert any(x == keysize for x in [128,192,256]), \
-                                    "keysize is wrong (must be one of 128, 192, or 256) --- aborting"
-        key = input("\nEnter key (any number of chars):  ")
-    key = key.strip()
-    key += '0' * (keysize//8 - len(key)) if len(key) < keysize//8 else key[:keysize//8]  
-    key_bv = BitVector( textstring = key )
-    return keysize,key_bv
 
 main()

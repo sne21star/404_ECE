@@ -4,22 +4,30 @@ Name: Sneha Mahapatra
 ECN Login: mahapat0
 Due Date: 02/18/2020
 """
+# !/usr/bin/env python
+# !/usr/bin/env python -W ignore:tostring:DeprecationWarning
 #python AES.py -e message.txt key.txt encrypted.txt
 #python AES.py -d encrypted.txt key.txt decrypted.txt
 from sys import *
 from BitVector import *
 AES_modulus = BitVector(bitstring='100011011')
 
-subBytesTable = []                                                  # for encryption
-invSubBytesTable = []                                               # for decryption
-
+subBYTESTABLE = []                                      # for encryption
+invSUBBYTESTABLE = []                                               # for decryption
+KEY_SCHEDULE = []
 SIZE = 256
-
+SUBBYTESTABLE = []
+INVSUBBYTESTABLE = []
 def encrypt():
     #Read Key
     READKEY = open(sys.argv[3], 'r')
     key = READKEY.read()
     READKEY.close()
+
+    # Create Key Schedule
+    print("encrypt")
+    KEY_SCHEDULE = keyInit(key)
+    printKeySchedule(KEY_SCHEDULE)
 
     #Turn File into BitVector
     bv = BitVector(filename=sys.argv[2])
@@ -32,8 +40,14 @@ def encrypt():
     # ShiftRows
     # Mix Columns  --> Not on last round
     # Add Round Keys
+
     while(bv.more_to_read):
         bitvec = bv.read_bits_from_file(SIZE)
+        if (len(str(bitvec)) % SIZE != 0):
+            x = bitvec.length() % SIZE
+            bitvec.pad_from_left(SIZE-x)
+        if (len(str(bitvec)) > 0):
+            pass
         numRounds = 10
         while(numRounds > 1):
             numRounds -= 1
@@ -43,8 +57,46 @@ def encrypt():
             pass
 
     encryptedText.close()
-    print("encrypt")
     pass
+
+def createMatrix(list_Before, n):
+    listBox = [0]*n
+    lenLB = int(len(list_Before) / n)
+    for row in range(0,lenLB):
+        listBox[row] = list_Before[row*n:n*(row+1)]
+    return listBox
+def printKeySchedule(key_schedule):
+    index = 0
+    for word in key_schedule:
+        print("word " + str(index) + "   " + str(word))
+        if((index+1) % 4 == 0):
+            print("\n")
+        index+=1
+
+def keyInit(key):
+    key_words = []
+    key = key.strip()
+    key += '0' * (SIZE // 8 - len(key)) if len(key) < SIZE // 8 else key[:SIZE // 8]
+    key_bv = BitVector(textstring=key)
+    key_words = gen_key_schedule_256(key_bv)
+
+    key_schedule = []
+
+    enumkey_word = enumerate(key_words)
+    for word_index, word in enumkey_word:
+        keyword_in_ints = []
+        for i in range(4):
+            keyword_in_ints.append(word[i * 8:i * 8 + 8].intValue())
+        #print("word %d:  %s" % (word_index, str(keyword_in_ints)))
+        key_schedule.append(keyword_in_ints)
+    #print(key_schedule)
+    num_rounds = 14
+    round_keys = [None for i in range(num_rounds + 1)]
+    for i in range(num_rounds + 1):
+        round_keys[i] = (key_words[i * 4] + key_words[i * 4 + 1] + key_words[i * 4 + 2] + key_words[i * 4 + 3]).get_bitvector_in_hex()
+
+    return key_schedule
+
 def gee(keyword, round_constant, byte_sub_table):
     '''
     This is the g() function you see in Figure 4 of Lecture 8.
@@ -104,7 +156,7 @@ def genTables():
         # For bit scrambling for the encryption SBox entries:
         a1,a2,a3,a4 = [a.deep_copy() for x in range(4)]
         a ^= (a1 >> 4) ^ (a2 >> 5) ^ (a3 >> 6) ^ (a4 >> 7) ^ c
-        subBytesTable.append(int(a))
+        subBYTESTABLE.append(int(a))
         # For the decryption Sbox:
         b = BitVector(intVal = i, size=8)
         # For bit scrambling for the decryption SBox entries:
@@ -112,23 +164,30 @@ def genTables():
         b = (b1 >> 2) ^ (b2 >> 5) ^ (b3 >> 7) ^ d
         check = b.gf_MI(AES_modulus, 8)
         b = check if isinstance(check, BitVector) else 0
-        invSubBytesTable.append(int(b))
-'''
-genTables()
-print("SBox for Encryption:")
-print(subBytesTable)
-print("SBox for Decryption:")
-print(invSubBytesTable)
-'''
+        invSUBBYTESTABLE.append(int(b))
+
 def decrypt():
     print("decrypt")
     pass
 
 def main():
-    charX = sys.argv[1]
-    if (charX == '-e'):
+    charInput = sys.argv[1]
+
+    # Generate Table for Encryption and Decryption
+    genTables()
+    #print("SBox for Encryption:")
+    q = createMatrix(subBYTESTABLE, 16)
+    SUBBYTESTABLE = q
+    #print(SUBBYTESTABLE)
+    #print("SBox for Decryption:")
+    q = createMatrix(invSUBBYTESTABLE, 16)
+    INVSUBBYTESTABLE = q
+    #print(INVSUBBYTESTABLE)
+
+
+    if (charInput == '-e'):
         encrypt()
-    elif (charX == '-d'):
+    elif (charInput == '-d'):
         decrypt()
     else:
         print("Either -e or -d")
