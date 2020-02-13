@@ -12,12 +12,12 @@ from sys import *
 from BitVector import *
 AES_modulus = BitVector(bitstring='100011011')
 
-subBYTESTABLE = []                                      # for encryption
-invSUBBYTESTABLE = []                                               # for decryption
+SUBBYTESTABLE = []                                      # for encryption
+INVSUBBYTESTABLE = []                                               # for decryption
 KEY_SCHEDULE = []
 SIZE = 256
-SUBBYTESTABLE = []
-INVSUBBYTESTABLE = []
+SIZEPLAIN = 128
+
 def encrypt():
     #Read Key
     READKEY = open(sys.argv[3], 'r')
@@ -27,7 +27,7 @@ def encrypt():
     # Create Key Schedule
     print("encrypt")
     KEY_SCHEDULE = keyInit(key)
-    printKeySchedule(KEY_SCHEDULE)
+    first_words = KEY_SCHEDULE[0]
 
     #Turn File into BitVector
     bv = BitVector(filename=sys.argv[2])
@@ -35,36 +35,135 @@ def encrypt():
     #Open File for Encrypted Text
     encryptedText = open(sys.argv[4], "w")
 
-    # For loop for 10 rounds
-    # SubBytes
-    # ShiftRows
-    # Mix Columns  --> Not on last round
-    # Add Round Keys
-
     while(bv.more_to_read):
-        bitvec = bv.read_bits_from_file(SIZE)
-        if (len(str(bitvec)) % SIZE != 0):
+        #Get 128 Bit for Plain Text
+        bitvec = bv.read_bits_from_file(SIZEPLAIN)
+
+        #If block is < 128, pad zeroes
+        if (len(str(bitvec)) % SIZEPLAIN != 0):
             x = bitvec.length() % SIZE
-            bitvec.pad_from_left(SIZE-x)
+            bitvec.pad_from_left(SIZEPLAIN-x)
         if (len(str(bitvec)) > 0):
             pass
-        numRounds = 10
+        # First Add Round Key
+        firstwordsHex = BitVector(hexstring = first_words)
+        bitvec = bitvec ^ firstwordsHex
+
+        #Turn Bit vector into State Array
+        statearray = matrixArray(bitvec)
+
+        # SubBytes
+        statearray = substitution(statearray)
+        print(statearray)
+
+        # ShiftRows
+        statearray = shiftRows(statearray)
+        print(statearray)
+        statearray = intToBitVector(statearray)
+        #print(bitToHex(statearray))
+
+        # Mix Columns  --> Not on last round
+        statearray = mixColumns(statearray)
+        p = bitToHex(statearray)
+        print(p)
+        # Add Round Keys
+        next_word = KEY_SCHEDULE[1]
+        firstwordsHex = BitVector(hexstring=next_word)
+        #statearray = statearray ^ firstwordsHex
+        break
+        numRounds = 14
         while(numRounds > 1):
             numRounds -= 1
             pass
-
         if(numRounds == 1):
             pass
-
     encryptedText.close()
     pass
 
-def createMatrix(list_Before, n):
-    listBox = [0]*n
-    lenLB = int(len(list_Before) / n)
-    for row in range(0,lenLB):
-        listBox[row] = list_Before[row*n:n*(row+1)]
-    return listBox
+def intToBitVector(matrix):
+    for i in range(4):
+        for j in range(4):
+            matrix[i][j] = BitVector(intVal = matrix[i][j], size = 8)
+    return matrix
+
+def bitToInt(matrix):
+    for i in range(4):
+        for j in range(4):
+            matrix[i][j] = int(matrix[i][j])
+    return matrix
+
+def bitToHex(matrix):
+    returnMatrix = [[0 for x in range(4)] for x in range(4)]
+    for i in range(4):
+        for j in range(4):
+            returnMatrix[i][j] = matrix[i][j].get_bitvector_in_hex()
+    return returnMatrix
+
+def intToHex(matrix):
+    for i in range(4):
+        for j in range(4):
+            matrix[i][j] = format(matrix[i][j], 'x')
+    return matrix
+def matrixArray(bitvec):
+    bitvecHex = bitvec.get_bitvector_in_hex()
+    n = 2
+    bitvecHex = [bitvecHex[i:i + n] for i in range(0, len(bitvecHex), n)]
+    print(bitvecHex)
+    statearray = [[0 for x in range(4)] for x in range(4)]
+    index = 0
+    for i in range(4):
+        for j in range(4):
+            statearray[i][j] = bitvecHex[index]
+            index+=1
+    return statearray
+
+def substitution(hexVector):
+    for i in range(4):
+        for j in range(4):
+            hexVector[i][j] = SUBBYTESTABLE[int(hexVector[i][j], 16)]
+    return hexVector
+
+def shiftRows(vector):
+    shift = 1
+    vector = [list(x) for x in zip(vector[0], vector[1], vector[2], vector[3])]
+    while(shift < 4):
+       vector[shift] = rotateElemList(vector[shift], shift)
+       shift+=1
+    vector = [list(x) for x in zip(vector[0], vector[1], vector[2], vector[3])]
+    return vector
+
+def rotateElemList(listX, shift):
+    return listX[shift:] + listX[:shift]
+
+def mixColumns(matrix):
+    MIXCOLUMNS = [[2, 3, 1, 1], [1, 2, 3, 1], [1, 1, 2, 3], [3, 1, 1, 2]]
+    mixColumns = intToBitVector(MIXCOLUMNS)
+    #mixColumns = [list(x) for x in zip(mixColumns[3], mixColumns[2], mixColumns[1], mixColumns[0])]
+    matrix = [list(x) for x in zip(matrix[0], matrix[1], matrix[2], matrix[3])]
+    endMatrix = [[0 for x in range(4)] for x in range(4)]
+    for i in range(4):
+        for j in range(4):
+            int0 = mixColumns[i][0]
+            int1 = mixColumns[i][1]
+            int2 = mixColumns[i][2]
+            int3 = mixColumns[i][3]
+            bitvec0 = int0.gf_multiply_modular(matrix[0][j], AES_modulus, 8)
+            bitvec1 = int1.gf_multiply_modular(matrix[1][j], AES_modulus, 8)
+            bitvec2 = int2.gf_multiply_modular(matrix[2][j], AES_modulus, 8)
+            bitvec3 = int3.gf_multiply_modular(matrix[3][j], AES_modulus, 8)
+            bitvec0 ^= bitvec1
+            bitvec0 ^= bitvec2
+            bitvec0 ^= bitvec3
+            endMatrix[i][j] = bitvec0
+            #matrix = [list(x) for x in zip(matrix[0], matrix[1], matrix[2], matrix[3])]
+    endMatrix = [list(x) for x in zip(endMatrix[0], endMatrix[1], endMatrix[2], endMatrix[3])]
+    return endMatrix
+
+def roundKeys(previousRoundKey, nextRoundKey, ):
+    actuallyRoundkey = 0
+    return actuallyRoundkey
+    pass
+
 def printKeySchedule(key_schedule):
     index = 0
     for word in key_schedule:
@@ -94,8 +193,7 @@ def keyInit(key):
     round_keys = [None for i in range(num_rounds + 1)]
     for i in range(num_rounds + 1):
         round_keys[i] = (key_words[i * 4] + key_words[i * 4 + 1] + key_words[i * 4 + 2] + key_words[i * 4 + 3]).get_bitvector_in_hex()
-
-    return key_schedule
+    return round_keys
 
 def gee(keyword, round_constant, byte_sub_table):
     '''
@@ -156,7 +254,7 @@ def genTables():
         # For bit scrambling for the encryption SBox entries:
         a1,a2,a3,a4 = [a.deep_copy() for x in range(4)]
         a ^= (a1 >> 4) ^ (a2 >> 5) ^ (a3 >> 6) ^ (a4 >> 7) ^ c
-        subBYTESTABLE.append(int(a))
+        SUBBYTESTABLE.append(int(a))
         # For the decryption Sbox:
         b = BitVector(intVal = i, size=8)
         # For bit scrambling for the decryption SBox entries:
@@ -164,7 +262,7 @@ def genTables():
         b = (b1 >> 2) ^ (b2 >> 5) ^ (b3 >> 7) ^ d
         check = b.gf_MI(AES_modulus, 8)
         b = check if isinstance(check, BitVector) else 0
-        invSUBBYTESTABLE.append(int(b))
+        INVSUBBYTESTABLE.append(int(b))
 
 def decrypt():
     print("decrypt")
@@ -175,16 +273,7 @@ def main():
 
     # Generate Table for Encryption and Decryption
     genTables()
-    #print("SBox for Encryption:")
-    q = createMatrix(subBYTESTABLE, 16)
-    SUBBYTESTABLE = q
     #print(SUBBYTESTABLE)
-    #print("SBox for Decryption:")
-    q = createMatrix(invSUBBYTESTABLE, 16)
-    INVSUBBYTESTABLE = q
-    #print(INVSUBBYTESTABLE)
-
-
     if (charInput == '-e'):
         encrypt()
     elif (charInput == '-d'):
