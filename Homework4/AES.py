@@ -18,6 +18,111 @@ KEY_SCHEDULE = []
 SIZE = 256
 SIZEPLAIN = 128
 
+def decrypt():
+    print("decrypt")
+    # Read Key
+    READKEY = open(sys.argv[3], 'r')
+    key = READKEY.read()
+    READKEY.close()
+
+    # Create Key Schedule
+    KEY_SCHEDULE = keyInit(key)
+    KEY_SCHEDULE = KEY_SCHEDULE[::-1]
+    first_words = KEY_SCHEDULE[0]
+
+    # Turn File into BitVector
+    HEXFILE = open(sys.argv[2], 'r')
+    hexString = HEXFILE.read()
+    print(hexString)
+    bv = BitVector(hexstring = hexString)
+    BITVECTORTEXT = open("bitVector.txt", "wb")
+    bv.write_to_file(BITVECTORTEXT)
+    BITVECTORTEXT.close()
+    bv = BitVector(filename="bitVector.txt")
+
+    # Open File for Encrypted Text
+    decryptedText = open(sys.argv[4], "w")
+
+    while (bv.more_to_read):
+        # Get 128 Bit for Plain Text
+        bitvec = bv.read_bits_from_file(SIZEPLAIN)
+
+        # If block is < 128, pad zeroes
+        if (len(str(bitvec)) % SIZEPLAIN != 0):
+            x = bitvec.length() % SIZE
+            bitvec.pad_from_right(SIZEPLAIN - x)
+        print("before round key")
+        print(bitvec.get_bitvector_in_hex())
+
+        # First Add Round Key
+        firstwordsHex = BitVector(hexstring=first_words)
+        bitvec = bitvec ^ firstwordsHex
+        numRounds = 1
+        while (numRounds < 14):
+            # Turn Bit vector into State Array
+            statearray = matrixArray(bitvec)
+            print("stateArray")
+            print(statearray)
+            # ShiftRows
+            statearray = shiftRows(statearray, 'D')
+            for i in range(4):
+                for j in range(4):
+                    statearray[i][j] = int(statearray[i][j], 16)
+            statearray = intToBitVector(statearray)
+
+            # SubBytes
+            statearray = substitution(statearray, 'D')
+            print("subbytes")
+            print(statearray)
+            # Add Round Keys
+            next_word = KEY_SCHEDULE[numRounds]
+            statearray = roundKeys(statearray, next_word)
+            print(statearray)
+            # Mix Columns  --> Not on last round
+            statearray = BitVector(hexstring=statearray)
+            print("Mix Columns")
+            statearray = matrixArray(statearray)
+            print(statearray)
+
+            for i in range(4):
+                for j in range(4):
+                    statearray[i][j] = int(statearray[i][j], 16)
+            statearray = intToBitVector(statearray)
+            statearray = mixColumns(statearray, 'D')
+            #p = bitToHex(statearray)
+            numRounds += 1
+        if (numRounds == 14):
+            # Turn Bit vector into State Array
+            statearray = matrixArray(bitvec)
+
+            # ShiftRows
+            statearray = shiftRows(statearray, 'D')
+            #statearray = intToBitVector(statearray)
+
+            # SubBytes
+            for i in range(4):
+                for j in range(4):
+                    statearray[i][j] = int(statearray[i][j], 16)
+            statearray = intToBitVector(statearray)
+            print(statearray)
+            statearray = substitution(statearray, 'D')
+            print("SUB")
+            print(statearray)
+            hexFinal = ""
+            for x in statearray:
+                for y in x:
+                    hexFinal += y
+            # Add RoundKey
+            next_word = KEY_SCHEDULE[numRounds]
+            hexFinal = roundKeys(hexFinal, next_word)
+            print(hexFinal)
+            hexFinal = BitVector(hexstring= hexFinal)
+
+            decryptedText.write(hexFinal.get_text_from_bitvector())
+            #break
+    decryptedText.close()
+    pass
+'''
 def encrypt():
     #Read Key
     READKEY = open(sys.argv[3], 'r')
@@ -42,44 +147,58 @@ def encrypt():
         #If block is < 128, pad zeroes
         if (len(str(bitvec)) % SIZEPLAIN != 0):
             x = bitvec.length() % SIZE
-            bitvec.pad_from_left(SIZEPLAIN-x)
-        if (len(str(bitvec)) > 0):
-            pass
+            bitvec.pad_from_right(SIZEPLAIN-x)
         # First Add Round Key
         firstwordsHex = BitVector(hexstring = first_words)
         bitvec = bitvec ^ firstwordsHex
+        numRounds = 1
+        while(numRounds < 14):
+            #Turn Bit vector into State Array
+            statearray = matrixArray(bitvec)
 
-        #Turn Bit vector into State Array
-        statearray = matrixArray(bitvec)
+            # SubBytes
+            statearray = substitution(statearray, 'E')
 
-        # SubBytes
-        statearray = substitution(statearray)
-        print(statearray)
+            # ShiftRows
+            statearray = shiftRows(statearray, 'E')
+            statearray = intToBitVector(statearray)
 
-        # ShiftRows
-        statearray = shiftRows(statearray)
-        print(statearray)
-        statearray = intToBitVector(statearray)
-        #print(bitToHex(statearray))
+            # Mix Columns  --> Not on last round
+            statearray = mixColumns(statearray, 'E')
+            p = bitToHex(statearray)
 
-        # Mix Columns  --> Not on last round
-        statearray = mixColumns(statearray)
-        p = bitToHex(statearray)
-        print(p)
-        # Add Round Keys
-        next_word = KEY_SCHEDULE[1]
-        firstwordsHex = BitVector(hexstring=next_word)
-        #statearray = statearray ^ firstwordsHex
-        break
-        numRounds = 14
-        while(numRounds > 1):
-            numRounds -= 1
-            pass
-        if(numRounds == 1):
-            pass
+            # Add Round Keys
+            next_word = KEY_SCHEDULE[numRounds]
+            statearray = roundKeys(p, next_word)
+            bitvec = BitVector(hexstring= statearray)
+            if (len(str(bitvec)) % SIZEPLAIN != 0):
+                x = bitvec.length() % SIZE
+                bitvec.pad_from_left(SIZEPLAIN - x)
+
+            numRounds += 1
+        if(numRounds == 14):
+            #Turn Bit vector into State Array
+            statearray = matrixArray(bitvec)
+
+            # SubBytes
+            statearray = substitution(statearray, 'E')
+
+            # ShiftRows
+            statearray = shiftRows(statearray, 'E')
+            statearray = intToBitVector(statearray)
+
+            hexFinal = ""
+            for x in statearray:
+                for y in x:
+                    hexFinal += y.get_bitvector_in_hex()
+            #Add RoundKey
+            next_word = KEY_SCHEDULE[numRounds]
+            hexFinal = roundKeys(hexFinal, next_word)
+            print(hexFinal)
+            encryptedText.write(hexFinal)
     encryptedText.close()
     pass
-
+'''
 def intToBitVector(matrix):
     for i in range(4):
         for j in range(4):
@@ -108,7 +227,6 @@ def matrixArray(bitvec):
     bitvecHex = bitvec.get_bitvector_in_hex()
     n = 2
     bitvecHex = [bitvecHex[i:i + n] for i in range(0, len(bitvecHex), n)]
-    print(bitvecHex)
     statearray = [[0 for x in range(4)] for x in range(4)]
     index = 0
     for i in range(4):
@@ -117,17 +235,25 @@ def matrixArray(bitvec):
             index+=1
     return statearray
 
-def substitution(hexVector):
-    for i in range(4):
-        for j in range(4):
-            hexVector[i][j] = SUBBYTESTABLE[int(hexVector[i][j], 16)]
+def substitution(hexVector, charX):
+    if(charX == 'E'):
+        for i in range(4):
+            for j in range(4):
+                hexVector[i][j] = SUBBYTESTABLE[int(hexVector[i][j], 16)]
+    else:
+        for i in range(4):
+            for j in range(4):
+                hexVector[i][j] = format(INVSUBBYTESTABLE[hexVector[i][j].int_val()], 'x')
     return hexVector
 
-def shiftRows(vector):
+def shiftRows(vector, charX):
     shift = 1
     vector = [list(x) for x in zip(vector[0], vector[1], vector[2], vector[3])]
     while(shift < 4):
-       vector[shift] = rotateElemList(vector[shift], shift)
+       if(charX == 'D'):
+           vector[shift] = rotateElemList(vector[shift], -shift)
+       else:
+           vector[shift] = rotateElemList(vector[shift], shift)
        shift+=1
     vector = [list(x) for x in zip(vector[0], vector[1], vector[2], vector[3])]
     return vector
@@ -135,10 +261,13 @@ def shiftRows(vector):
 def rotateElemList(listX, shift):
     return listX[shift:] + listX[:shift]
 
-def mixColumns(matrix):
-    MIXCOLUMNS = [[2, 3, 1, 1], [1, 2, 3, 1], [1, 1, 2, 3], [3, 1, 1, 2]]
-    mixColumns = intToBitVector(MIXCOLUMNS)
-    #mixColumns = [list(x) for x in zip(mixColumns[3], mixColumns[2], mixColumns[1], mixColumns[0])]
+def mixColumns(matrix, charX):
+    MIXCOLUMNSE = [[2, 3, 1, 1], [1, 2, 3, 1], [1, 1, 2, 3], [3, 1, 1, 2]]
+    MIXCOLUMNSD = [[14, 11, 13, 9],[9, 14, 11, 13],[13, 9, 14, 11],[11, 13, 9, 14]]
+    if(charX == 'E'):
+        mixColumns = intToBitVector(MIXCOLUMNSE)
+    else:
+        mixColumns = intToBitVector(MIXCOLUMNSD)
     matrix = [list(x) for x in zip(matrix[0], matrix[1], matrix[2], matrix[3])]
     endMatrix = [[0 for x in range(4)] for x in range(4)]
     for i in range(4):
@@ -159,9 +288,19 @@ def mixColumns(matrix):
     endMatrix = [list(x) for x in zip(endMatrix[0], endMatrix[1], endMatrix[2], endMatrix[3])]
     return endMatrix
 
-def roundKeys(previousRoundKey, nextRoundKey, ):
-    actuallyRoundkey = 0
-    return actuallyRoundkey
+def roundKeys(p, next_words):
+    hexFinal = ""
+    for x in p:
+        for y in x:
+            hexFinal += y
+    hexFinal = BitVector(hexstring=hexFinal)
+    if (len(str(hexFinal)) % SIZEPLAIN != 0):
+        x = hexFinal.length() % SIZE
+        hexFinal.pad_from_left(SIZEPLAIN - x)
+    next_word = BitVector(hexstring=next_words)
+    hexFinal = hexFinal ^ next_word
+    hexFinal = hexFinal.get_bitvector_in_hex()
+    return hexFinal
     pass
 
 def printKeySchedule(key_schedule):
@@ -263,10 +402,6 @@ def genTables():
         check = b.gf_MI(AES_modulus, 8)
         b = check if isinstance(check, BitVector) else 0
         INVSUBBYTESTABLE.append(int(b))
-
-def decrypt():
-    print("decrypt")
-    pass
 
 def main():
     charInput = sys.argv[1]
