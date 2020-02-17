@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/../../EPCS412/CNN_ASL/.idea/CNN_ASL.iml" filepath="$PROJECT_DIR$/../../EPCS412/CNN_ASL/.idea/CNN_ASL.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../testAES/ECE-404/Homework 4/.idea/Homework 4.iml" filepath="$PROJECT_DIR$/../../testAES/ECE-404/Homework 4/.idea/Homework 4.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/Homework4.iml" filepath="$PROJECT_DIR$/.idea/Homework4.iml" />
     </modules>
   </component>
