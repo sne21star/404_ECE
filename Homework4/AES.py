@@ -26,7 +26,7 @@ def encrypt():
     READKEY.close()
 
     # Create Key Schedule
-    print("encrypt")
+    #print("encrypt")
     KEY_SCHEDULE = keyInit(key)
     first_words = KEY_SCHEDULE[0]
 
@@ -66,7 +66,7 @@ def encrypt():
             # Add Round Keys
             next_word = KEY_SCHEDULE[numRounds]
             statearray = roundKeys(p, next_word)
-            print(statearray)
+            #print(statearray.get_bitvector_in_hex())
             bitvec = statearray#BitVector(hexstring= statearray)
             if (len(str(bitvec)) % SIZEPLAIN != 0):
                 x = bitvec.length() % SIZE
@@ -90,18 +90,18 @@ def encrypt():
             #Add RoundKey
             next_word = KEY_SCHEDULE[numRounds]
             hexFinal = roundKeys(hexFinal, next_word)
-            print(hexFinal.get_bitvector_in_hex())
+            #print(hexFinal.get_bitvector_in_hex())
             encryptedText.write(hexFinal.get_bitvector_in_hex())
     encryptedText.close()
     pass
 
 
 def decrypt():
-    print("decrypt")
+    #print("decrypt")
     # Read Key
     READKEY = open(sys.argv[3], 'r')
     key = READKEY.read()
-    printKeySchedule(key)
+    #printKeySchedule(key)
     READKEY.close()
 
     # Create Key Schedule
@@ -126,8 +126,8 @@ def decrypt():
         if (len(str(bitvec)) % SIZEPLAIN != 0):
             x = bitvec.length() % SIZEPLAIN
             bitvec.pad_from_right(SIZEPLAIN - x)
-        print("before round key")
-        print(bitvec.get_bitvector_in_hex())
+        #print("before round key")
+        #print(bitvec.get_bitvector_in_hex())
 
         # First Add Round Key
         first_words = KEY_SCHEDULE[0]
@@ -138,27 +138,27 @@ def decrypt():
             # Turn Bit vector into State Array
             if(numRounds == 1):
                 statearray = matrixArray(bitvec)
-            print("stateArray")
-            print(statearray)
+            #print("stateArray")
+            #print(statearray)
 
             # ShiftRows - WORKING
             statearray = InverseshiftRows(statearray)
-            print("Shift Row")
-            print(statearray)
+            #print("Shift Row")
+            #print(statearray)
             statearray = hextobit(statearray)
 
             # SubBytes - WORKING
             statearray = substitution(statearray, 'D')
-            print("subbytes")
+            #print("subbytes")
             statearray = [list(x) for x in zip(statearray[0], statearray[1], statearray[2], statearray[3])]
-            print(statearray)
+            #print(statearray)
             statearray = intToHex(statearray)
-            print(statearray)
+            #print(statearray)
 
             # Add Round Keys - WORKING
             NW = KEY_SCHEDULE[numRounds]
-            print("round key")
-            print(NW)
+            #print("round key")
+            #print(NW)
             hexFinalL = ""
             if(numRounds == 1):
                 for i in range(4):
@@ -169,22 +169,22 @@ def decrypt():
                     for j in range(4):
                         if(len(str(statearray[j][i])) == 1):
                                 statearray[j][i] = '0' + statearray[j][i]
-                        print(statearray[j][i])
+                        #print(statearray[j][i])
                         hexFinalL += statearray[j][i]
-            print(hexFinalL)
+            #print(hexFinalL)
             hexFinalL = BitVector(hexstring=hexFinalL)
             next_word = BitVector(hexstring=NW)
             statearray = hexFinalL ^ next_word
-            print("inverse round key")
-            print(statearray.get_bitvector_in_hex())
+            #print("inverse round key")
+            #print(statearray.get_bitvector_in_hex())
 
             # Mix Columns  --> Not on last round
             statearray = matrixArray(statearray)
             statearray = hextobit(statearray)
             statearray = mixColumns(statearray, 'D')
-            print("Mix Columns")
-            print(statearray[0][0].get_bitvector_in_hex())
-            print(statearray[3][3].get_bitvector_in_hex())
+            #print("Mix Columns")
+            #print(statearray[0][0].get_bitvector_in_hex())
+            #print(statearray[3][3].get_bitvector_in_hex())
             #statearray = [list(x) for x in zip(statearray[0], statearray[1], statearray[2], statearray[3])]
             #Put into bitvector and start process again
             statearray = bitToHex(statearray)
@@ -192,13 +192,13 @@ def decrypt():
 
         if (numRounds == 14):
             #statearray = matrixArray(bitvec)
-            print("stateArray")
-            print(statearray)
+            #print("stateArray")
+            #print(statearray)
 
             # ShiftRows
             statearray = InverseshiftRows(statearray)
-            print("Shift Row")
-            print(statearray)
+            #print("Shift Row")
+            #print(statearray)
             statearray = hextobit(statearray)
 
             # SubBytes
@@ -206,28 +206,28 @@ def decrypt():
             #statearray = matrixArray(statearray)
             #statearray = hextobit(statearray)
             statearray = substitution(statearray, 'D')
-            print("subbytes")
+            #print("subbytes")
             statearray = intToHex(statearray)
-            print(statearray)
+            #print(statearray)
 
             # Add Round Keys
             NW = KEY_SCHEDULE[numRounds]
-            print("round key")
-            print(NW)
+            #print("round key")
+            #print(NW)
             hexFinalL = ""
             for i in range(4):
                 for j in range(4):
                     if (len(str(statearray[i][j])) == 1):
                         statearray[i][j] = '0' + statearray[i][j]
-                    print(statearray[i][j])
+                    #print(statearray[i][j])
                     hexFinalL += statearray[i][j]
-            print(hexFinalL)
+            #print(hexFinalL)
             hexFinalL = BitVector(hexstring=hexFinalL)
             next_word = BitVector(hexstring=NW)
             hexFinal = hexFinalL ^ next_word
             #Send text to file
-            print(hexFinal.get_bitvector_in_hex())
-            print(hexFinal.get_bitvector_in_ascii())
+            #print(hexFinal.get_bitvector_in_hex())
+            #print(hexFinal.get_bitvector_in_ascii())
             hexFinal = hexFinal.get_text_from_bitvector()
             if(ord(hexFinal[len(hexFinal)-1]) == 0):
                 hexFinal = hexFinal[:-1]
