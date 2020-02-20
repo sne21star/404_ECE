@@ -4,6 +4,7 @@ Name: Sneha Mahapatra
 ECN Login: mahapat0
 Due Date: 02/05/2020
 '''
+from sympy import *
 def getinput():
 	gotNumber = False
 	while not gotNumber:
@@ -14,7 +15,14 @@ def getinput():
 		else:
 			gotNumber = True
 	return int(given_num)
-
+'''
+	else:
+		for factor in range(2, given_num):
+			if(given_num % factor) == 0:
+				isprimeX = False
+				break
+	'''
+## doesn't always work
 def isPrime(given_num):
 	isprimeX = True
 	if(given_num < 2):
@@ -24,10 +32,7 @@ def isPrime(given_num):
 	elif(given_num % 2 == 0):
 		return False
 	else:
-		for factor in range(2, given_num):
-			if(given_num % factor) == 0:
-				isprimeX = False
-				break
+		isprimeX = (2 ** (given_num - 1)) % given_num == 1
 	return isprimeX
 
 def isfield(num):
@@ -35,10 +40,12 @@ def isfield(num):
 
 def main():
 	given_num = getinput()
-	isField = isfield(given_num)
-	if isField:
-		print("field")
-	else:
-		print("ring")
+	for i in range(0, 1000):
+		isField = isfield(i)
+		print(isprime(i) == isField)
+			#if isField:
+				#print("field")
+			#else:
+				#print("ring")
 if __name__ == "__main__":
 	main()

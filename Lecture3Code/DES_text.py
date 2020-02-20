@@ -31,8 +31,7 @@ def encrypt():
         bitvec = bv.read_bits_from_file(SIZE)
         if (len(str(bitvec)) % SIZE != 0):
             x = bitvec.length() % SIZE
-            bitvec.pad_from_left(SIZE-
-                                 x)
+            bitvec.pad_from_left(SIZE-x)
         if (len(str(bitvec)) > 0):
             [LE, RE] = bitvec.divide_into_two()
             for keyR in round_key:
@@ -49,7 +48,6 @@ def encrypt():
         text_file.write(myhexstring)
     text_file.close()
     pass
-
 
 def decrypt():
     FILEREAD = open(sys.argv[3], 'r')
