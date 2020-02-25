@@ -4,6 +4,8 @@ Name: Sneha Mahapatra
 ECN Login: mahapat0
 Due Date: 02/25/2020
 """
+#I AM USING PYTHON3
+#!/usr/bin/env python3
 from sys import *
 from BitVector import *
 AES_modulus = BitVector(bitstring='100011011')
@@ -46,6 +48,7 @@ def encrypt(key, v0, image_file, out_file):
     bv = BitVector(filename=image_file)
 
     index = -1
+    #read header
     bv.read_bits_from_file(SIZEPLAIN - 16)
     while(bv.more_to_read):
         #Get 128 Bit for Plain Text and Ignore the header
@@ -172,7 +175,6 @@ def mixColumns(matrix):
     mixColumns = [[bv2GBL, bv3GBL, bv1GBL, bv1GBL], [bv1GBL, bv2GBL, bv3GBL, bv1GBL], [bv1GBL, bv1GBL, bv2GBL, bv3GBL], [bv3GBL, bv1GBL, bv1GBL, bv2GBL]]
     matrix = [list(x) for x in zip(matrix[0], matrix[1], matrix[2], matrix[3])]
     endMatrix = [[0 for x in range(4)] for x in range(4)]
-
     for i in range(4):
         for j in range(4):
             bitvec0 = (mixColumns[i][0]).gf_multiply_modular(matrix[0][j], AES_modulus, 8)
@@ -225,7 +227,7 @@ def gee(keyword, round_constant, byte_sub_table):
     round_constant = round_constant.gf_multiply_modular(BitVector(intVal = 0x02), AES_modulus, 8)
     return newword, round_constant
 def gen_key_schedule_256(key_bv):
-    byte_sub_table = gen_subbytes_table()
+    byte_sub_table = SUBBYTESTABLE
     #  We need 60 keywords (each keyword consists of 32 bits) in the key schedule for
     #  256 bit AES. The 256-bit AES uses the first four keywords to xor the input
     #  block with.  Subsequently, each of the 14 rounds uses 4 keywords from the key
@@ -251,16 +253,6 @@ def gen_key_schedule_256(key_bv):
         else:
             sys.exit("error in key scheduling algo for i = %d" % i)
     return key_words
-
-def gen_subbytes_table():
-    subBytesTable = []
-    c = BitVector(bitstring='01100011')
-    for i in range(0, 256):
-        a = BitVector(intVal = i, size=8).gf_MI(AES_modulus, 8) if i != 0 else BitVector(intVal=0)
-        a1,a2,a3,a4 = [a.deep_copy() for x in range(4)]
-        a ^= (a1 >> 4) ^ (a2 >> 5) ^ (a3 >> 6) ^ (a4 >> 7) ^ c
-        subBytesTable.append(int(a))
-    return subBytesTable
 #Arguments:
 # iv: 128-bit initialization vector
 # image_file: input .ppm image file name
