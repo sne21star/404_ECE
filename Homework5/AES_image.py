@@ -8,25 +8,38 @@ Due Date: 02/25/2020
 #!/usr/bin/env python3
 from sys import *
 from BitVector import *
-AES_modulus = BitVector(bitstring='100011011')
-bv1GBL = BitVector(intVal=1, size=8)
-bv2GBL = BitVector(intVal=2, size=8)
-bv3GBL = BitVector(intVal=3, size=8)
 
-SUBBYTESTABLE = [99, 124, 119, 123, 242, 107, 111, 197, 48, 1, 103, 43, 254, 215, 171, 118, 202, 130, 201, 125, 250, 89, 71, 240,
-     173, 212, 162, 175, 156, 164, 114, 192, 183, 253, 147, 38, 54, 63, 247, 204, 52, 165, 229, 241, 113, 216, 49, 21,
-     4, 199, 35, 195, 24, 150, 5, 154, 7, 18, 128, 226, 235, 39, 178, 117, 9, 131, 44, 26, 27, 110, 90, 160, 82, 59,
-     214, 179, 41, 227, 47, 132, 83, 209, 0, 237, 32, 252, 177, 91, 106, 203, 190, 57, 74, 76, 88, 207, 208, 239, 170,
-     251, 67, 77, 51, 133, 69, 249, 2, 127, 80, 60, 159, 168, 81, 163, 64, 143, 146, 157, 56, 245, 188, 182, 218, 33,
-     16, 255, 243, 210, 205, 12, 19, 236, 95, 151, 68, 23, 196, 167, 126, 61, 100, 93, 25, 115, 96, 129, 79, 220, 34,
-     42, 144, 136, 70, 238, 184, 20, 222, 94, 11, 219, 224, 50, 58, 10, 73, 6, 36, 92, 194, 211, 172, 98, 145, 149, 228,
-     121, 231, 200, 55, 109, 141, 213, 78, 169, 108, 86, 244, 234, 101, 122, 174, 8, 186, 120, 37, 46, 28, 166, 180,
-     198, 232, 221, 116, 31, 75, 189, 139, 138, 112, 62, 181, 102, 72, 3, 246, 14, 97, 53, 87, 185, 134, 193, 29, 158,
-     225, 248, 152, 17, 105, 217, 142, 148, 155, 30, 135, 233, 206, 85, 40, 223, 140, 161, 137, 13, 191, 230, 66, 104,
-     65, 153, 45, 15, 176, 84, 187, 22]
 KEY_SCHEDULE = []
-SIZE = 256
-SIZEPLAIN = 128
+class Const(object):
+    SIZE = 256
+    SIZEPLAIN = 128
+    FOUR = 4
+    EIGHT = 8
+    AES_MODULUS = BitVector(bitstring='100011011')
+    BV_ONE = BitVector(intVal=1, size=8)
+    BV_TWO = BitVector(intVal=2, size=8)
+    BV_THREE = BitVector(intVal=3, size=8)
+    SUBBYTESTABLE = [99, 124, 119, 123, 242, 107, 111, 197, 48, 1, 103, 43, 254, 215, 171, 118, 202, 130, 201,
+                              125, 250, 89, 71, 240,
+                              173, 212, 162, 175, 156, 164, 114, 192, 183, 253, 147, 38, 54, 63, 247, 204, 52, 165, 229,
+                              241, 113, 216, 49, 21,
+                              4, 199, 35, 195, 24, 150, 5, 154, 7, 18, 128, 226, 235, 39, 178, 117, 9, 131, 44, 26, 27,
+                              110, 90, 160, 82, 59,
+                              214, 179, 41, 227, 47, 132, 83, 209, 0, 237, 32, 252, 177, 91, 106, 203, 190, 57, 74, 76,
+                              88, 207, 208, 239, 170,
+                              251, 67, 77, 51, 133, 69, 249, 2, 127, 80, 60, 159, 168, 81, 163, 64, 143, 146, 157, 56,
+                              245, 188, 182, 218, 33,
+                              16, 255, 243, 210, 205, 12, 19, 236, 95, 151, 68, 23, 196, 167, 126, 61, 100, 93, 25, 115,
+                              96, 129, 79, 220, 34,
+                              42, 144, 136, 70, 238, 184, 20, 222, 94, 11, 219, 224, 50, 58, 10, 73, 6, 36, 92, 194,
+                              211, 172, 98, 145, 149, 228,
+                              121, 231, 200, 55, 109, 141, 213, 78, 169, 108, 86, 244, 234, 101, 122, 174, 8, 186, 120,
+                              37, 46, 28, 166, 180,
+                              198, 232, 221, 116, 31, 75, 189, 139, 138, 112, 62, 181, 102, 72, 3, 246, 14, 97, 53, 87,
+                              185, 134, 193, 29, 158,
+                              225, 248, 152, 17, 105, 217, 142, 148, 155, 30, 135, 233, 206, 85, 40, 223, 140, 161, 137,
+                              13, 191, 230, 66, 104,
+                              65, 153, 45, 15, 176, 84, 187, 22]
 
 def encrypt(key, v0, image_file, out_file):
     # Create Key Schedule
@@ -47,14 +60,14 @@ def encrypt(key, v0, image_file, out_file):
 
     index = -1
     #read header
-    bv.read_bits_from_file(SIZEPLAIN - 16)
+    bv.read_bits_from_file(Const.SIZEPLAIN - 16)
     while(bv.more_to_read):
         #Get 128 Bit for Plain Text and Ignore the header
-        XorAtEnd = bv.read_bits_from_file(SIZEPLAIN)
+        XorAtEnd = bv.read_bits_from_file(Const.SIZEPLAIN)
 
         #If block is < 128, pad zeroes
-        if (len(str(XorAtEnd)) % SIZEPLAIN != 0):
-            XorAtEnd.pad_from_right(SIZEPLAIN-(XorAtEnd.length() % SIZE))
+        if (len(str(XorAtEnd)) % Const.SIZEPLAIN != 0):
+            XorAtEnd.pad_from_right(Const.SIZEPLAIN-(XorAtEnd.length() % Const.SIZE))
 
         #THE BITVECTOR IS INTIALIZED BITVECTOR INCREMENT IF NECESSARY
         index += 1
@@ -124,7 +137,7 @@ def matrixArray(bitvec):
 def substitution(hexVector):
     for i in range(4):
         for j in range(4):
-            hexVector[i][j] = BitVector(intVal=SUBBYTESTABLE[int(hexVector[i][j], 16)], size = 8)
+            hexVector[i][j] = BitVector(intVal=Const.SUBBYTESTABLE[int(hexVector[i][j], 16)], size = 8)
     return hexVector
 
 def shiftRows(vector):
@@ -138,15 +151,15 @@ def shiftRows(vector):
 
 def mixColumns(matrix):
                   #[[2, 3, 1, 1], [1, 2, 3, 1], [1, 1, 2, 3], [3, 1, 1, 2]]
-    mixColumns = [[bv2GBL, bv3GBL, bv1GBL, bv1GBL], [bv1GBL, bv2GBL, bv3GBL, bv1GBL], [bv1GBL, bv1GBL, bv2GBL, bv3GBL], [bv3GBL, bv1GBL, bv1GBL, bv2GBL]]
+    mixColumns = [[Const.BV_TWO, Const.BV_THREE, Const.BV_ONE, Const.BV_ONE], [Const.BV_ONE, Const.BV_TWO, Const.BV_THREE, Const.BV_ONE], [Const.BV_ONE, Const.BV_ONE, Const.BV_TWO, Const.BV_THREE], [Const.BV_THREE, Const.BV_ONE, Const.BV_ONE, Const.BV_TWO]]
     matrix = [list(x) for x in zip(matrix[0], matrix[1], matrix[2], matrix[3])]
     endMatrix = [[0 for x in range(4)] for x in range(4)]
     for i in range(4):
         for j in range(4):
-            bitvec0 = (mixColumns[i][0]).gf_multiply_modular(matrix[0][j], AES_modulus, 8)
-            bitvec1 = (mixColumns[i][1]).gf_multiply_modular(matrix[1][j], AES_modulus, 8)
-            bitvec2 = (mixColumns[i][2]).gf_multiply_modular(matrix[2][j], AES_modulus, 8)
-            bitvec3 = (mixColumns[i][3]).gf_multiply_modular(matrix[3][j], AES_modulus, 8)
+            bitvec0 = (mixColumns[i][0]).gf_multiply_modular(matrix[0][j], Const.AES_MODULUS, 8)
+            bitvec1 = (mixColumns[i][1]).gf_multiply_modular(matrix[1][j], Const.AES_MODULUS, 8)
+            bitvec2 = (mixColumns[i][2]).gf_multiply_modular(matrix[2][j], Const.AES_MODULUS, 8)
+            bitvec3 = (mixColumns[i][3]).gf_multiply_modular(matrix[3][j], Const.AES_MODULUS, 8)
             endMatrix[i][j] = bitvec0 ^ bitvec1 ^ bitvec2 ^ bitvec3
     endMatrix = [list(x) for x in zip(endMatrix[0], endMatrix[1], endMatrix[2], endMatrix[3])]
     return endMatrix
@@ -154,7 +167,7 @@ def mixColumns(matrix):
 def keyInit(key):
     key_words = []
     key = key.strip()
-    key += '0' * (SIZE // 8 - len(key)) if len(key) < SIZE // 8 else key[:SIZE // 8]
+    key += '0' * (Const.SIZE // Const.EIGHT - len(key)) if len(key) < Const.SIZE // Const.EIGHT else key[:Const.SIZE // Const.EIGHT]
     key_bv = BitVector(textstring=key)
     key_words = gen_key_schedule_256(key_bv)
 
@@ -164,7 +177,7 @@ def keyInit(key):
     for word_index, word in enumkey_word:
         keyword_in_ints = []
         for i in range(4):
-            keyword_in_ints.append(word[i * 8:i * 8 + 8].intValue())
+            keyword_in_ints.append(word[i * Const.EIGHT:i * Const.EIGHT + Const.EIGHT].intValue())
         key_schedule.append(keyword_in_ints)
     num_rounds = 14
     round_keys = [None for i in range(num_rounds + 1)]
@@ -177,37 +190,37 @@ def gee(keyword, round_constant, byte_sub_table):
     This is the g() function you see in Figure 4 of Lecture 8.
     '''
     rotated_word = keyword.deep_copy()
-    rotated_word << 8
+    rotated_word << Const.EIGHT
     newword = BitVector(size = 0)
     for i in range(4):
-        newword += BitVector(intVal = byte_sub_table[rotated_word[8*i:8*i+8].intValue()], size = 8)
-    newword[:8] ^= round_constant
-    round_constant = round_constant.gf_multiply_modular(bv2GBL, AES_modulus, 8)
+        newword += BitVector(intVal = byte_sub_table[rotated_word[Const.EIGHT*i:Const.EIGHT*i+Const.EIGHT].intValue()], size = Const.EIGHT)
+    newword[:Const.EIGHT] ^= round_constant
+    round_constant = round_constant.gf_multiply_modular(Const.BV_TWO, Const.AES_MODULUS, Const.EIGHT)
     return newword, round_constant
 def gen_key_schedule_256(key_bv):
-    byte_sub_table = SUBBYTESTABLE
+    byte_sub_table = Const.SUBBYTESTABLE
     #  We need 60 keywords (each keyword consists of 32 bits) in the key schedule for
     #  256 bit AES. The 256-bit AES uses the first four keywords to xor the input
     #  block with.  Subsequently, each of the 14 rounds uses 4 keywords from the key
     #  schedule. We will store all 60 keywords in the following list:
     key_words = [None for i in range(60)]
-    round_constant = bv1GBL
-    for i in range(8):
+    round_constant = Const.BV_ONE
+    for i in range(Const.EIGHT):
         key_words[i] = key_bv[i*32 : i*32 + 32]
-    for i in range(8,60):
-        if i%8 == 0:
+    for i in range(Const.EIGHT,60):
+        if i%Const.EIGHT == 0:
             kwd, round_constant = gee(key_words[i-1], round_constant, byte_sub_table)
-            key_words[i] = key_words[i-8] ^ kwd
-        elif (i - (i//8)*8) < 4:
+            key_words[i] = key_words[i-Const.EIGHT] ^ kwd
+        elif (i - (i//Const.EIGHT)*Const.EIGHT) < 4:
             key_words[i] = key_words[i-8] ^ key_words[i-1]
-        elif (i - (i//8)*8) == 4:
+        elif (i - (i//Const.EIGHT)*Const.EIGHT) == 4:
             key_words[i] = BitVector(size = 0)
             for j in range(4):
                 key_words[i] += BitVector(intVal =
-                                 byte_sub_table[key_words[i-1][8*j:8*j+8].intValue()], size = 8)
-            key_words[i] ^= key_words[i-8]
-        elif ((i - (i//8)*8) > 4) and ((i - (i//8)*8) < 8):
-            key_words[i] = key_words[i-8] ^ key_words[i-1]
+                                 byte_sub_table[key_words[i-1][Const.EIGHT*j:Const.EIGHT*j+Const.EIGHT].intValue()], size = Const.EIGHT)
+            key_words[i] ^= key_words[i-Const.EIGHT]
+        elif ((i - (i//Const.EIGHT)*Const.EIGHT) > 4) and ((i - (i//Const.EIGHT)*Const.EIGHT) < Const.EIGHT):
+            key_words[i] = key_words[i-Const.EIGHT] ^ key_words[i-1]
         else:
             sys.exit("error in key scheduling algo for i = %d" % i)
     return key_words
