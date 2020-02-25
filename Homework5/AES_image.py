@@ -182,7 +182,7 @@ def gee(keyword, round_constant, byte_sub_table):
     for i in range(4):
         newword += BitVector(intVal = byte_sub_table[rotated_word[8*i:8*i+8].intValue()], size = 8)
     newword[:8] ^= round_constant
-    round_constant = round_constant.gf_multiply_modular(BitVector(intVal = 0x02), AES_modulus, 8)
+    round_constant = round_constant.gf_multiply_modular(bv2GBL, AES_modulus, 8)
     return newword, round_constant
 def gen_key_schedule_256(key_bv):
     byte_sub_table = SUBBYTESTABLE
@@ -191,7 +191,7 @@ def gen_key_schedule_256(key_bv):
     #  block with.  Subsequently, each of the 14 rounds uses 4 keywords from the key
     #  schedule. We will store all 60 keywords in the following list:
     key_words = [None for i in range(60)]
-    round_constant = BitVector(intVal = 0x01, size=8)
+    round_constant = bv1GBL
     for i in range(8):
         key_words[i] = key_bv[i*32 : i*32 + 32]
     for i in range(8,60):
