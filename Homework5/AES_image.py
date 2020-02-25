@@ -7,6 +7,9 @@ Due Date: 02/25/2020
 from sys import *
 from BitVector import *
 AES_modulus = BitVector(bitstring='100011011')
+bv1GBL = BitVector(intVal=1, size=8)
+bv2GBL = BitVector(intVal=2, size=8)
+bv3GBL = BitVector(intVal=3, size=8)
 
 SUBBYTESTABLE = [99, 124, 119, 123, 242, 107, 111, 197, 48, 1, 103, 43, 254, 215, 171, 118, 202, 130, 201, 125, 250, 89, 71, 240,
      173, 212, 162, 175, 156, 164, 114, 192, 183, 253, 147, 38, 54, 63, 247, 204, 52, 165, 229, 241, 113, 216, 49, 21,
@@ -18,13 +21,12 @@ SUBBYTESTABLE = [99, 124, 119, 123, 242, 107, 111, 197, 48, 1, 103, 43, 254, 215
      121, 231, 200, 55, 109, 141, 213, 78, 169, 108, 86, 244, 234, 101, 122, 174, 8, 186, 120, 37, 46, 28, 166, 180,
      198, 232, 221, 116, 31, 75, 189, 139, 138, 112, 62, 181, 102, 72, 3, 246, 14, 97, 53, 87, 185, 134, 193, 29, 158,
      225, 248, 152, 17, 105, 217, 142, 148, 155, 30, 135, 233, 206, 85, 40, 223, 140, 161, 137, 13, 191, 230, 66, 104,
-     65, 153, 45, 15, 176, 84, 187, 22]            # for encryption
+     65, 153, 45, 15, 176, 84, 187, 22]
 KEY_SCHEDULE = []
 SIZE = 256
 SIZEPLAIN = 128
 
 def encrypt(key, v0, image_file, out_file):
-    #Key is given to us
     # Create Key Schedule
     KEY_SCHEDULE = keyInit(key)
     first_words = KEY_SCHEDULE[0]
@@ -44,11 +46,9 @@ def encrypt(key, v0, image_file, out_file):
     bv = BitVector(filename=image_file)
 
     index = -1
+    bv.read_bits_from_file(SIZEPLAIN - 16)
     while(bv.more_to_read):
-
         #Get 128 Bit for Plain Text and Ignore the header
-        if(index == -1):
-            XorAtEnd = bv.read_bits_from_file(SIZEPLAIN-16)
         XorAtEnd = bv.read_bits_from_file(SIZEPLAIN)
 
         #If block is < 128, pad zeroes
@@ -73,48 +73,40 @@ def encrypt(key, v0, image_file, out_file):
             statearray = matrixArray(bitvec)
 
             # SubBytes
-            statearray = substitution(statearray, 'E')
+            statearray = substitution(statearray)
 
             # ShiftRows
-            statearray = shiftRows(statearray, 'E')
-            statearray = intToBitVector(statearray)
+            statearray = shiftRows(statearray)
+            #statearray = intToBitVector(statearray)
 
             # Mix Columns  --> Not on last round
-            statearray = mixColumns(statearray, 'E')
+            statearray = mixColumns(statearray)
             hexFinal = bitToHex(statearray)
 
             # Add Round Keys
             next_word = KEY_SCHEDULE[numRounds]
-            strX = ""
-            hexFinal = [''.join(x) for x in hexFinal]
-            hexFinal = BitVector(hexstring=strX.join(hexFinal))
             next_word = BitVector(hexstring=next_word)
             bitvec = hexFinal ^ next_word
             numRounds += 1
-        if(numRounds == 14):
-            #Turn Bit vector into State Array
-            statearray = matrixArray(bitvec)
+        #Turn Bit vector into State Array
+        statearray = matrixArray(bitvec)
 
-            # SubBytes
-            statearray = substitution(statearray, 'E')
+        # SubBytes
+        statearray = substitution(statearray)
 
-            # ShiftRows
-            statearray = shiftRows(statearray, 'E')
-            statearray = intToBitVector(statearray)
-            hexFinal = bitToHex(statearray)
+        # ShiftRows
+        statearray = shiftRows(statearray)
 
-            #Add RoundKey
-            next_word = KEY_SCHEDULE[numRounds]
-            strX = ""
-            hexFinal = [''.join(x) for x in hexFinal]
-            hexFinal = BitVector(hexstring=strX.join(hexFinal))
-            next_word = BitVector(hexstring=next_word)
-            hexFinal = hexFinal ^ next_word
-            #roundKeys(hexFinal, next_word)
+        hexFinal = bitToHex(statearray)
 
-            #XOR The plaintext with the encrypted File
-            hexFinal = hexFinal ^ XorAtEnd
-            hexFinal.write_to_file(encryptedText)
+        #Add RoundKey
+        next_word = KEY_SCHEDULE[numRounds]
+        next_word = BitVector(hexstring=next_word)
+        hexFinal = hexFinal ^ next_word
+
+        #XOR The plaintext with the encrypted File
+        hexFinal = hexFinal ^ XorAtEnd
+        hexFinal.write_to_file(encryptedText)
     encryptedText.close()
 
 def intToBitVector(matrix):
@@ -136,10 +128,10 @@ def bitToInt(matrix):
     return matrix
 
 def bitToHex(matrix):
-    returnMatrix = [[0 for x in range(4)] for x in range(4)]
+    returnMatrix = BitVector(size=0)
     for i in range(4):
         for j in range(4):
-            returnMatrix[i][j] = matrix[i][j].get_bitvector_in_hex()
+            returnMatrix += matrix[i][j]
     return returnMatrix
 
 def intToHex(matrix):
@@ -160,32 +152,27 @@ def matrixArray(bitvec):
             index += 2
     return statearray
 
-def substitution(hexVector, charX):
+def substitution(hexVector):
     for i in range(4):
         for j in range(4):
-            hexVector[i][j] = SUBBYTESTABLE[int(hexVector[i][j], 16)]
+            hexVector[i][j] = BitVector(intVal=SUBBYTESTABLE[int(hexVector[i][j], 16)], size = 8)
     return hexVector
 
-def shiftRows(vector, charX):
+def shiftRows(vector):
     shift = 1
     vector = [list(x) for x in zip(vector[0], vector[1], vector[2], vector[3])]
     while(shift < 4):
-       vector[shift] = rotateElemList(vector[shift], shift)
+       vector[shift] = vector[shift][shift:] + vector[shift][:shift]
        shift+=1
     vector = [list(x) for x in zip(vector[0], vector[1], vector[2], vector[3])]
     return vector
 
-def rotateElemList(listX, shift):
-    return listX[shift:] + listX[:shift]
-
-def mixColumns(matrix, charX):
-    bv1 = BitVector(intVal=1, size=8)
-    bv2 = BitVector(intVal=2, size=8)
-    bv3 = BitVector(intVal=3, size=8)
+def mixColumns(matrix):
                   #[[2, 3, 1, 1], [1, 2, 3, 1], [1, 1, 2, 3], [3, 1, 1, 2]]
-    mixColumns = [[bv2, bv3, bv1, bv1], [bv1, bv2, bv3, bv1], [bv1, bv1, bv2, bv3], [bv3, bv1, bv1, bv2]]
+    mixColumns = [[bv2GBL, bv3GBL, bv1GBL, bv1GBL], [bv1GBL, bv2GBL, bv3GBL, bv1GBL], [bv1GBL, bv1GBL, bv2GBL, bv3GBL], [bv3GBL, bv1GBL, bv1GBL, bv2GBL]]
     matrix = [list(x) for x in zip(matrix[0], matrix[1], matrix[2], matrix[3])]
     endMatrix = [[0 for x in range(4)] for x in range(4)]
+
     for i in range(4):
         for j in range(4):
             bitvec0 = (mixColumns[i][0]).gf_multiply_modular(matrix[0][j], AES_modulus, 8)
@@ -204,14 +191,6 @@ def roundKeys(p, next_words):
     #hexFinal = hexFinal ^ next_word
     return hexFinal ^ next_word
 
-def printKeySchedule(key_schedule):
-    index = 0
-    for word in key_schedule:
-        print("word " + str(index) + "   " + str(word))
-        if((index+1) % 4 == 0):
-            print("\n")
-        index+=1
-
 def keyInit(key):
     key_words = []
     key = key.strip()
@@ -226,9 +205,7 @@ def keyInit(key):
         keyword_in_ints = []
         for i in range(4):
             keyword_in_ints.append(word[i * 8:i * 8 + 8].intValue())
-        #print("word %d:  %s" % (word_index, str(keyword_in_ints)))
         key_schedule.append(keyword_in_ints)
-    #print(key_schedule)
     num_rounds = 14
     round_keys = [None for i in range(num_rounds + 1)]
     for i in range(num_rounds + 1):
@@ -284,26 +261,6 @@ def gen_subbytes_table():
         a ^= (a1 >> 4) ^ (a2 >> 5) ^ (a3 >> 6) ^ (a4 >> 7) ^ c
         subBytesTable.append(int(a))
     return subBytesTable
-'''
-def genTables():
-    c = BitVector(bitstring='01100011')
-    d = BitVector(bitstring='00000101')
-    for i in range(0, 256):
-        # For the encryption SBox
-        a = BitVector(intVal = i, size=8).gf_MI(AES_modulus, 8) if i != 0 else BitVector(intVal=0)
-        # For bit scrambling for the encryption SBox entries:
-        a1,a2,a3,a4 = [a.deep_copy() for x in range(4)]
-        a ^= (a1 >> 4) ^ (a2 >> 5) ^ (a3 >> 6) ^ (a4 >> 7) ^ c
-        SUBBYTESTABLE.append(int(a))
-        # For the decryption Sbox:
-        b = BitVector(intVal = i, size=8)
-        # For bit scrambling for the decryption SBox entries:
-        b1,b2,b3 = [b.deep_copy() for x in range(3)]
-        b = (b1 >> 2) ^ (b2 >> 5) ^ (b3 >> 7) ^ d
-        check = b.gf_MI(AES_modulus, 8)
-        b = check if isinstance(check, BitVector) else 0
-        INVSUBBYTESTABLE.append(int(b))
-'''
 #Arguments:
 # iv: 128-bit initialization vector
 # image_file: input .ppm image file name
