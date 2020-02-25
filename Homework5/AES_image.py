@@ -31,8 +31,6 @@ SIZEPLAIN = 128
 def encrypt(key, v0, image_file, out_file):
     # Create Key Schedule
     KEY_SCHEDULE = keyInit(key)
-    first_words = KEY_SCHEDULE[0]
-
     #Turn File into BitVector by Reading Image File
     image = open(image_file, 'rb')
     imageno = image.readline()
@@ -56,8 +54,7 @@ def encrypt(key, v0, image_file, out_file):
 
         #If block is < 128, pad zeroes
         if (len(str(XorAtEnd)) % SIZEPLAIN != 0):
-            x = XorAtEnd.length() % SIZE
-            XorAtEnd.pad_from_right(SIZEPLAIN-x)
+            XorAtEnd.pad_from_right(SIZEPLAIN-(XorAtEnd.length() % SIZE))
 
         #THE BITVECTOR IS INTIALIZED BITVECTOR INCREMENT IF NECESSARY
         index += 1
@@ -67,8 +64,8 @@ def encrypt(key, v0, image_file, out_file):
         bitvec = vX
 
         # First Add Round Key
-        firstwordsHex = BitVector(hexstring = first_words)
-        bitvec = bitvec ^ firstwordsHex
+        #firstwordsHex = BitVector(hexstring = first_words)
+        bitvec = bitvec ^ KEY_SCHEDULE[0]
         numRounds = 1
 
         while(numRounds < 14):
@@ -80,16 +77,13 @@ def encrypt(key, v0, image_file, out_file):
 
             # ShiftRows
             statearray = shiftRows(statearray)
-            #statearray = intToBitVector(statearray)
 
             # Mix Columns  --> Not on last round
             statearray = mixColumns(statearray)
             hexFinal = bitToHex(statearray)
 
             # Add Round Keys
-            next_word = KEY_SCHEDULE[numRounds]
-            next_word = BitVector(hexstring=next_word)
-            bitvec = hexFinal ^ next_word
+            bitvec = hexFinal ^ KEY_SCHEDULE[numRounds]
             numRounds += 1
         #Turn Bit vector into State Array
         statearray = matrixArray(bitvec)
@@ -103,32 +97,12 @@ def encrypt(key, v0, image_file, out_file):
         hexFinal = bitToHex(statearray)
 
         #Add RoundKey
-        next_word = KEY_SCHEDULE[numRounds]
-        next_word = BitVector(hexstring=next_word)
-        hexFinal = hexFinal ^ next_word
+        hexFinal = hexFinal ^ KEY_SCHEDULE[numRounds]
 
         #XOR The plaintext with the encrypted File
         hexFinal = hexFinal ^ XorAtEnd
         hexFinal.write_to_file(encryptedText)
     encryptedText.close()
-
-def intToBitVector(matrix):
-    for i in range(4):
-        for j in range(4):
-            matrix[i][j] = BitVector(intVal = matrix[i][j], size = 8)
-    return matrix
-
-def hextobit(matrix):
-    for i in range(4):
-        for j in range(4):
-            matrix[i][j] = BitVector(hexstring = matrix[i][j])
-    return matrix
-
-def bitToInt(matrix):
-    for i in range(4):
-        for j in range(4):
-            matrix[i][j] = int(matrix[i][j])
-    return matrix
 
 def bitToHex(matrix):
     returnMatrix = BitVector(size=0)
@@ -136,14 +110,6 @@ def bitToHex(matrix):
         for j in range(4):
             returnMatrix += matrix[i][j]
     return returnMatrix
-
-def intToHex(matrix):
-    for i in range(4):
-        for j in range(4):
-            matrix[i][j] = format(matrix[i][j], 'x')
-            if(len(str(matrix[i][j])) == 1):
-                matrix[i][j] = '0' + matrix[i][j]
-    return matrix
 
 def matrixArray(bitvec):
     bitvecHex = list(bitvec.get_bitvector_in_hex())
@@ -185,14 +151,6 @@ def mixColumns(matrix):
     endMatrix = [list(x) for x in zip(endMatrix[0], endMatrix[1], endMatrix[2], endMatrix[3])]
     return endMatrix
 
-def roundKeys(p, next_words):
-    strX = ""
-    hexFinal = [''.join(x) for x in p]
-    hexFinal = BitVector(hexstring=strX.join(hexFinal))
-    next_word = BitVector(hexstring=next_words)
-    #hexFinal = hexFinal ^ next_word
-    return hexFinal ^ next_word
-
 def keyInit(key):
     key_words = []
     key = key.strip()
@@ -211,7 +169,7 @@ def keyInit(key):
     num_rounds = 14
     round_keys = [None for i in range(num_rounds + 1)]
     for i in range(num_rounds + 1):
-        round_keys[i] = (key_words[i * 4] + key_words[i * 4 + 1] + key_words[i * 4 + 2] + key_words[i * 4 + 3]).get_bitvector_in_hex()
+        round_keys[i] = (key_words[i * 4] + key_words[i * 4 + 1] + key_words[i * 4 + 2] + key_words[i * 4 + 3])
     return round_keys
 
 def gee(keyword, round_constant, byte_sub_table):
