@@ -12,27 +12,27 @@ import numpy as np
 import sys
 
 def solve_pRoot(p,y):
-    #p = long(p);
-    #y = long(y);
+    p = int(p);
+    y = int(y);
     # Initial guess for xk
     try:
-        xk = pow(y,1.0/p)
+        xk = int(pow(y,1.0/p));
     except:
         # Necessary for larger value of y
         # Approximate y as 2^a * y0
-        y0 = y
-        a = 0
+        y0 = y;
+        a = 0;
         while (y0 > sys.float_info.max):
-            y0 = y0 >> 1
-            a += 1
+            y0 = y0 >> 1;
+            a += 1;
         # log xk = log2 y / p
         # log xk = (a + log2 y0) / p
-        xk = pow(2.0, ( a + np.log2(float(y0)) )/ p )
+        xk = int(pow(2.0, ( a + np.log2(float(y0)) )/ p ));
 
     # Solve for x using Newton's Method
-    err_k = pow(xk,p)-y
+    err_k = int(pow(xk,p))-y;
     while (abs(err_k) > 1):
-        gk = p*pow(xk,p-1)
-        err_k = pow(xk,p)-y
-        xk = -err_k/gk + xk
+        gk = p*int(pow(xk,p-1));
+        err_k = int(pow(xk,p))-y;
+        xk = int(-err_k/gk) + xk;
     return xk

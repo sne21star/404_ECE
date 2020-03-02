@@ -7,8 +7,8 @@ Due Date: 03/03/2020
 # !/usr/bin/env python
 # !/usr/bin/env python -W ignore:tostring:DeprecationWarning
 #python rsa.py -g p.txt q.txt
-#python rsa.py -e message.txt p_test.txt q_test.txt encrypted.txt
-#python rsa.py -d encrypted.txt p_test.txt q_test.txt decrypted.txt
+#python rsa.py -e message.txt p.txt q.txt encrypted.txt
+#python rsa.py -d encrypted.txt p.txt q.txt decrypted.txt
 from sys import *
 from BitVector import *
 import random
@@ -155,7 +155,6 @@ def encrypt():
         messageInt = bitvec.int_val()
         num = pow(messageInt, e, n)
         cipherText = BitVector(intVal=num, size=SIZE_256)
-        print(cipherText)
         #Write to File in hex
         encryptedText.write(cipherText.get_bitvector_in_hex())
     #close
