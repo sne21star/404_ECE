@@ -40,12 +40,11 @@ def isfield(num):
 
 def main():
 	given_num = getinput()
-	for i in range(0, 1000):
-		isField = isfield(i)
-		print(isprime(i) == isField)
-			#if isField:
-				#print("field")
-			#else:
-				#print("ring")
+	isField = isfield(given_num)
+	print(isprime(given_num) == isField)
+	if isField:
+		print("field")
+	else:
+		print("ring")
 if __name__ == "__main__":
 	main()
