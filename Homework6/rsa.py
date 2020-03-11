@@ -18,7 +18,6 @@ SIZE_128 = 128
 SIZE_256 = 256
 
 class PrimeGenerator( object ):                                              #(A1)
-
     def __init__( self, **kwargs ):                                          #(A2)
         bits = debug = None                                                  #(A3)
         if 'bits' in kwargs  :     bits = kwargs.pop('bits')                 #(A4)
