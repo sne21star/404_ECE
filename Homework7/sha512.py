@@ -104,23 +104,24 @@ def sha512(message):
 def main():
 	BLOCKSIZE = 65536
 	hasher = hashlib.sha512()
-	with open(sys.argv[1], 'rb') as afile:
-		buf = afile.read(BLOCKSIZE)
-		while len(buf) > 0:
-			hasher.update(buf)
+	if (len(sys.argv) > 4):
+		with open(sys.argv[3], 'rb') as afile:
 			buf = afile.read(BLOCKSIZE)
-	decryptedText = open(sys.argv[2], "w")
-	decryptedText.write(hasher.hexdigest())
-	decryptedText.close()
-	
-	inputFile = open(sys.argv[3], "r")
+			while len(buf) > 0:
+				hasher.update(buf)
+				buf = afile.read(BLOCKSIZE)
+		decryptedText = open(sys.argv[4], "w")
+		decryptedText.write(hasher.hexdigest())
+		decryptedText.close()
+
+	inputFile = open(sys.argv[1], "r")
 	message = inputFile.read()
 	inputFile.close()
 
-	outputHash512 = sha512("I love Chicken Tikka Masala")
-	decryptedText = open(sys.argv[4], "w")
-	decryptedText.write(outputHash512)
-	decryptedText.close()
+	outputHash512 = sha512(message)
+	hashText = open(sys.argv[2], "w")
+	hashText.write(outputHash512)
+	hashText.close()
 	return 0
 
 
