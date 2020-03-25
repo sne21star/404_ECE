@@ -10,10 +10,10 @@ if len(sys.argv) != 5:
    print("Usage>>>:   %s  source_IP  dest_IP  dest_port  how_many_packets" % sys.argv[0])
    sys.exit(1)
 
-srcIP    = sys.argv[1]                                                       #(1)
-destIP   = sys.argv[2]                                                       #(2)
-destPort = int(sys.argv[3])                                                  #(3)
-count    = int(sys.argv[4])                                                  #(4)
+srcIP    = "199.164.42.228"                                                      #(1)
+destIP   = "128.46.144.123"                                                  #(2)
+destPort = 554                                              #(3)
+count    = 10                                                  #(4)
 
 for i in range(count):                                                       #(5)
     IP_header = IP(src = srcIP, dst = destIP)                                #(6)
