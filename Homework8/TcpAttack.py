@@ -4,6 +4,7 @@ Name: Sneha Mahapatra
 ECN Login: mahapat0
 Due Date: March 26, 2020
 '''
+#!/usr/bin/env python3
 import socket
 import subprocess
 import sys
