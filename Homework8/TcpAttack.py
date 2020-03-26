@@ -1,15 +1,11 @@
+#!/usr/local/bin/python3
 '''
 Homework Number: 8
 Name: Sneha Mahapatra
 ECN Login: mahapat0
 Due Date: March 26, 2020
 '''
-# !/usr/bin/env python3
-import socket
-import subprocess
-import sys
-from datetime import datetime
-import re
+
 import os.path
 from scapy.all import *
 from scapy.layers.inet import TCP
