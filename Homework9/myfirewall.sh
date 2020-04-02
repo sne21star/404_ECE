@@ -1,10 +1,15 @@
-#!/bin/sh
 '''
+Homework Number: 9
+Name: Sneha Mahapatra
+ECN Login: mahapat0
+Due Date: April 2, 2020
+'''
+#!/bin/sh
 # A minimalist sort of a firewall for your laptop:
 
 # Create a new user-defined chain for the filter table: Make sure you first
-# flush the previous rules by 'iptables -t filter F' and delete the
-# previous chains by 'iptables -t filter -X'
+# flush the previous rules by iptables -t filter F and delete the
+# previous chains by iptables -t filter -X
 iptables -t filter -N myfirewall.rules
 
 # Accept all packets generated locally:
@@ -62,4 +67,43 @@ iptables -A myfirewall.rules -p all -j REJECT --reject-with icmp-host-prohibited
 
 iptables -I INPUT -j myfirewall.rules
 iptables -I FORWARD -j myfirewall.rules
-'''
+
+#Line 1 Remove any previous rules or chains
+sudo iptables -t filter -F
+sudo iptables -t filter -X
+sudo iptables -t mangle -F
+sudo iptables -t mangle -X
+sudo iptables -t nat -F
+sudo iptables -t nat -X
+sudo iptables -t raw -F
+sudo iptables -t raw -X
+
+#Line 2 For all outgoing packets, change their source IP address to your own machine’s IP address
+var=$(hostname -I)
+sudo iptables -t nat -A POSTROUTING -o $var -j MASQUERADE
+
+#Line 3 Block a list of specific IP addresses (of your choosing) for all incoming connections.
+sudo iptables -A INPUT -s 209.175.44.100 -j DROP
+
+#Line 4 Block your computer from being pinged by all other hosts (Hint: ping uses ICMP Echo
+#requests).
+sudo iptables -A myfirewall.rules -p icmp --icmp-type echo-request -j DROP
+#sudo iptables -A INPUT -p icmp --icmp-type echo-request -j REJECT
+
+#Line 5 Set up port-forwarding from an unused port of your choice to port 22 on your computer.
+# Test if you can SSH into your machine using both ports
+# (Hint: You need to enable connections on the unused port as well).
+
+
+#Line 6 Allow for SSH access (port 22) to your machine from only the engineering.purdue.edu domain.
+sudo iptables -A INPUT -p tcp -s 128.46.104.5 --dport 22 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+
+# Line 7 Assuming you are running an HTTPD server on your machine that can make available your entire
+# home directory to the outside world, write a rule that allows only a single IP address in the internet
+# to access your machine for the HTTP service.
+sudo iptables
+
+#Line 8 Permit Auth/Ident (port 113) that is used by some services like SMTP and IRC.
+tcp_services = "113"
+sudo iptables -A INPUT -m state --state=ESTABLISHED,RELATED -j ACCEPT
+sudo iptables -A INPUT -i $ext_if -p tcp --dport $tcp_services --syn -j ACCEPT
