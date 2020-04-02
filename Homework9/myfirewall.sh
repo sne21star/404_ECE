@@ -92,8 +92,7 @@ sudo iptables -A myfirewall.rules -p icmp --icmp-type echo-request -j DROP
 #Line 5 Set up port-forwarding from an unused port of your choice to port 22 on your computer.
 # Test if you can SSH into your machine using both ports
 # (Hint: You need to enable connections on the unused port as well).
-#sudo iptables -t nat -A PREROUTING -p tcp -d 123.45.67.89 -dport 22 -j DNAT --to-destination 192.168.1.9
-sudo iptables -t nat -A PREROUTING -p tcp --dport 25570 -j REDIRECT --to-port 22 -j DNAT --to-destination 192.168.1.9
+sudo iptables -t nat -A PREROUTING -p tcp --dport 25570 -j REDIRECT --to-port 22
 
 #Line 6 Allow for SSH access (port 22) to your machine from only the engineering.purdue.edu domain.
 sudo iptables -A myfirewall.rules -p tcp -s 128.46.104.5 --dport 22 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
@@ -103,8 +102,9 @@ sudo iptables -A myfirewall.rules -p tcp -s 128.46.104.5 --dport 22 -m conntrack
 # to access your machine for the HTTP service.
 sudo iptables -A myfirewall.rules -p tcp -s 15.15.15.1 --dport 80 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
 
-
 #Line 8 Permit Auth/Ident (port 113) that is used by some services like SMTP and IRC.
-tcp_services = "113"
-sudo iptables -A INPUT -m state --state=ESTABLISHED,RELATED -j ACCEPT
-sudo iptables -A INPUT -i $ext_if -p tcp --dport $tcp_services --syn -j ACCEPT
+tcp_services = "22,113"
+ext_if = "eth0"
+iptables -A INPUT -m state --state=ESTABLISHED,RELATED -j ACCEPT
+iptables -A INPUT -i $ext_if -p tcp --dport $tcp_services --syn -j ACCEPT
+
