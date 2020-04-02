@@ -78,9 +78,8 @@ sudo iptables -t raw -F
 sudo iptables -t raw -X
 
 #Line 2 For all outgoing packets, change their source IP address to your own machine’s IP address
-modprobe ip_nat_ftp
 sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
-iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j DNAT --to-destination 192.168.1.9
+sudo iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j DNAT --to-destination 192.168.1.9
 
 #Line 3 Block a list of specific IP addresses (of your choosing) for all incoming connections.
 sudo iptables -A firewall404.rules -s 209.175.44.100 -j DROP
@@ -104,7 +103,6 @@ sudo iptables -A firewall404.rules -p tcp -s 128.46.104.5 --dport 22 -m conntrac
 sudo iptables -A firewall404.rules -p tcp -s 15.15.15.1 --dport 80 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
 
 #Line 8 Permit Auth/Ident (port 113) that is used by some services like SMTP and IRC.
-ext_if = "eth0"
-iptables -A INPUT -m state --state=ESTABLISHED,RELATED -j ACCEPT
-iptables -A INPUT -i $ext_if -p tcp --dport 113 --syn -j ACCEPT
+sudo iptables -A INPUT -m state --state=ESTABLISHED,RELATED -j ACCEPT
+sudo iptables -A INPUT -i eth0 -p tcp --dport 113 --syn -j ACCEPT
 
