@@ -78,8 +78,9 @@ sudo iptables -t raw -F
 sudo iptables -t raw -X
 
 #Line 2 For all outgoing packets, change their source IP address to your own machine’s IP address
-#var=$(192.168.1.9 -I)
-sudo iptables -t nat -A POSTROUTING -o 192.168.1.9 -j MASQUERADE
+modprobe ip_nat_ftp
+sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j DNAT --to-destination 192.168.1.9
 
 #Line 3 Block a list of specific IP addresses (of your choosing) for all incoming connections.
 sudo iptables -A firewall404.rules -s 209.175.44.100 -j DROP
