@@ -1,9 +1,8 @@
-'''
-Homework Number: 9
-Name: Sneha Mahapatra
-ECN Login: mahapat0
-Due Date: April 2, 2020
-'''
+#Homework Number: 9
+#Name: Sneha Mahapatra
+#ECN Login: mahapat0
+#Due Date: April 2, 2020
+
 #!/bin/sh
 # A minimalist sort of a firewall for your laptop:
 
