@@ -105,5 +105,3 @@ sudo iptables -A firewall404.rules -p tcp -s 15.15.15.1 --dport 80 -m conntrack 
 #Line 8 Permit Auth/Ident (port 113) that is used by some services like SMTP and IRC.
 sudo iptables -A INPUT -m state --state=ESTABLISHED,RELATED -j ACCEPT
 sudo iptables -A INPUT -i eth0 -p tcp --dport 113 --syn -j ACCEPT
-
-
