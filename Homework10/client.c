@@ -16,10 +16,14 @@
 //#include <unistd.h>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 #define PORT 7000
 =======
 #define PORT 7778
 >>>>>>> 998d10d6203e76b9598d99a2eb35d941a57812b7
+=======
+#define PORT 7001
+>>>>>>> ae66623fef65ee8076d9c700e142caf8093b078e
 #define MAX_DATA_SIZE 4096
 
 int isHexChar(char c);

@@ -117,8 +117,17 @@ char * clientComm(int clntSockfd,int * senderBuffSize_addr, int * optlen_addr){
         fprintf(stderr,"ERROR, no way to print out\n");
         exit(1);
     }
-
-    strcpy(str, recvBuff);
+    /*
+    The vulnerability in the previous server.c is the strcpy function.
+    In the strcpy function the function seeks the ‘\0’ character for the string end and copies the values
+    into the buffer. However, the buffer is only size of 5. So if we input a larger string we can
+    overflow the buffer and push strcpy to go to the right stack frame and change the register
+    of the return address to be the function we want it to be.
+    Down below is the specially string I used (which had 56 A’s + the address of the secrectFunction)
+    to get to the secret function(explanation of how why I choose this string is on page 4).
+    I fixed this by changing the function to be strncpy which forces the programmer
+    to write the size of how many char to put in. */
+    strncpy(str, recvBuff, MAX_DATA_SIZE);
 
     /* send data to the client */
     if (send(clntSockfd, str, strlen(str), 0) == -1) {
