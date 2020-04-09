@@ -15,7 +15,7 @@
 //#include <arpa/inet.h>
 //#include <unistd.h>
 
-#define PORT 7778
+#define PORT 7777
 #define MAX_DATA_SIZE 4096
 
 int isHexChar(char c);
