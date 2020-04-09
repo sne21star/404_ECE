@@ -8,7 +8,9 @@ Due Date: 02/25/2020
 #!/usr/bin/env python3
 from sys import *
 from BitVector import *
-
+'''
+Computer Timing : 597 seconds ~ 9 minutes and 57 seconds
+'''
 KEY_SCHEDULE = []
 class Const(object):
     SIZE = 256

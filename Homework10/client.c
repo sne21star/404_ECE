@@ -15,7 +15,11 @@
 //#include <arpa/inet.h>
 //#include <unistd.h>
 
+<<<<<<< HEAD
 #define PORT 7000
+=======
+#define PORT 7778
+>>>>>>> 998d10d6203e76b9598d99a2eb35d941a57812b7
 #define MAX_DATA_SIZE 4096
 
 int isHexChar(char c);
@@ -33,7 +37,6 @@ int main(int argc, char *argv[])
 		fprintf(stderr,"Usage: %s <host IP address>\n", argv[0]);
 		exit(1);
 	}
-
 	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
 		perror("socket");
 		exit(1);
