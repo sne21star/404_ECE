@@ -118,7 +118,7 @@ char * clientComm(int clntSockfd,int * senderBuffSize_addr, int * optlen_addr){
         exit(1);
     }
 
-    strcpy(str, recvBuff);
+    strncpy(str, recvBuff, MAX_DATA_SIZE);
 
     /* send data to the client */
     if (send(clntSockfd, str, strlen(str), 0) == -1) {
